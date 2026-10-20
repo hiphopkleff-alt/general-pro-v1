@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0f18">
+<title>GENERAL PRO V1.0</title>
+<style>
+:root{--bg:#0b0f18;--panel:#141b29;--border:#263247;--text:#edf3ff;--muted:#91a0b8;--green:#00e6a0;--red:#ff496c;--blue:#58a6ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+header{padding:18px;background:#101725;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:2}
+.brand{font-weight:900;font-size:21px;letter-spacing:1px}
+.brand span{color:var(--green)}
+.sub{color:var(--muted);font-size:12px;margin-top:6px}
+main{max-width:1050px;margin:auto;padding:14px}
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+select,button,input{background:#101725;color:var(--text);border:1px solid var(--border);padding:12px;border-radius:9px;font-size:14px}
+button{cursor:pointer}
+button.primary{background:var(--green);color:#07140f;font-weight:bold;border:0}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:13px}
+.label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.value{font-size:25px;font-weight:bold;margin-top:9px;overflow-wrap:anywhere}
+.muted{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.signal{font-size:24px;font-weight:900;margin-top:9px}
+.buy{color:var(--green)}.sell{color:var(--red)}.wait{color:#ffd166}
+.levels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:12px}
+.level{background:#0d1420;padding:12px;border-radius:9px;overflow-wrap:anywhere}
+.level b{display:block;margin-top:6px;font-size:16px}
+.status{font-size:12px;padding:8px 10px;border-radius:8px;background:#202a3a;color:#ffd166;display:inline-block}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:12px}
+td,th{padding:10px 5px;border-bottom:1px solid var(--border);text-align:left}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:25px}
+canvas{width:100%;height:160px}
+@keyframes pulse{50%{opacity:.35}}
+.blink{animation:pulse 1s infinite}
+@media(min-width:700px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}.layout{display:grid;grid-template-columns:1.2fr .8fr;gap:12px}.layout .card{margin-top:13px}.layout .wide{grid-column:1/-1}}
+@media(max-width:380px){.value{font-size:21px}.levels{grid-template-columns:1fr}.brand{font-size:18px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand">GENERAL <span>PRO</span> V1.0</div>
+ <div class="sub">LIVE MARKET INTELLIGENCE · SIGNALS ONLY · NO TRADE EXECUTION</div>
+</header>
+<main>
+ <div class="row" style="margin-top:12px">
+  <select id="symbol">
+   <option>BTC/USD</option><option>ETH/USD</option><option>SOL/USD</option>
+   <option>EUR/USD</option><option>GBP/USD</option><option>USD/JPY</option>
+   <option>XAU/USD</option><option>XAG/USD</option>
+  </select>
+  <select id="tf"><option value="15m">15 Minutes</option><option value="1h" selected>1 Hour</option><option value="4h">4 Hours</option><option value="1d">1 Day</option></select>
+  <button class="primary" id="refresh">↻ Refresh</button>
+  <button id="sound">🔕 Sound off</button>
+ </div>
+
+ <div class="card">
+  <div class="row" style="justify-content:space-between">
+   <div><div class="label">Selected market</div><div class="value" id="market">BTC/USD</div></div>
+   <div><div class="label">Live price</div><div class="value" id="price">—</div></div>
+  </div>
+  <div style="margin-top:12px"><span id="status" class="status">Connecting to market data…</span></div>
+  <div class="sub" id="updated">Waiting for verified market data.</div>
+ </div>
+
+ <div class="layout">
+ <div class="card">
+  <div class="label">Market signal</div>
+  <div id="signal" class="signal wait">WAITING FOR DATA</div>
+  <p class="muted" id="reason">A signal will be calculated only after market candles are received.</p>
+  <div class="label" style="margin-top:18px">Indicator alignment score</div>
+  <div class="value" id="confidence">—</div>
+  <div style="height:7px;background:#273145;border-radius:10px;margin-top:9px;overflow:hidden"><div id="bar" style="height:100%;width:0;background:var(--blue)"></div></div>
+  <p class="sub">This score measures indicator agreement; it is not a probability of profit.</p>
+  <div class="grid">
+   <div><div class="label">EMA 20</div><div id="ema20" class="value">—</div></div>
+   <div><div class="label">EMA 50</div><div id="ema50" class="value">—</div></div>
+   <div><div class="label">RSI 14</div><div id="rsi" class="value">—</div></div>
+   <div><div class="label">MACD</div><div id="macd" class="value">—</div></div>
+  </div>
+ </div>
+
+ <div class="card">
+  <div class="label">Signal levels</div>
+  <div class="levels">
+   <div class="level"><span class="label">Entry</span><b id="entry">—</b></div>
+   <div class="level"><span class="label">Stop loss</span><b id="sl">—</b></div>
+   <div class="level"><span class="label">Risk / reward</span><b id="rr">—</b></div>
+   <div class="level"><span class="label">Take profit 1</span><b id="tp1">—</b></div>
+   <div class="level"><span class="label">Take profit 2</span><b id="tp2">—</b></div>
+   <div class="level"><span class="label">Take profit 3</span><b id="tp3">—</b></div>
+  </div>
+  <button style="width:100%;margin-top:12px" id="copy">Copy signal</button>
+  <p class="sub" id="signalTime">No signal calculated yet.</p>
+ </div>
+
+ <div class="card wide">
+  <div class="row" style="justify-content:space-between">
+   <div><div class="label">Price history</div><div class="sub">Most recent candles from the selected data provider</div></div>
+   <div class="label" id="source">Source: —</div>
+  </div>
+  <canvas id="chart" width="900" height="180"></canvas>
+ </div>
+
+ <div class="card">
+  <div class="label">Historical backtest</div>
+  <div class="sub">Simple EMA 20/50 crossover test on the fetched candles. Historical results do not guarantee future performance.</div>
+  <div class="grid" style="margin-top:15px">
+   <div><div class="label">Closed trades</div><div id="trades" class="value">—</div></div>
+   <div><div class="label">Win rate</div><div id="winrate" class="value">—</div></div>
+   <div><div class="label">Net return</div><div id="net" class="value">—</div></div>
+   <div><div class="label">Max drawdown</div><div id="dd" class="value">—</div></div>
+  </div>
+  <p class="sub" id="btNote">Backtest will run when enough candles are available.</p>
+ </div>
+ </div>
+
+ <div class="card">
+  <div class="label">Signal log</div>
+  <table><thead><tr><th>Time</th><th>Market</th><th>Signal</th><th>Price</th></tr></thead><tbody id="log"><tr><td colspan="4" class="muted">No signals yet.</td></tr></tbody></table>
+ </div>
+ <p class="sub">Data access depends on provider availability, symbol support, quotas and subscription. If live data cannot be verified, the dashboard shows an error instead of inventing prices.</p>
+</main>
+<footer>GENERAL PRO V1.0 · Market analysis only · Not financial advice</footer>
+<script>
+const $=id=>document.getElementById(id);
+let candles=[], lastSignal="", soundOn=false, audioCtx=null, lastKey="";
+const fmt=n=>Number.isFinite(n)?n.toLocaleString("en-US",{maximumFractionDigits:n>100?3:6}):"—";
+const mean=a=>a.reduce((s,n)=>s+n,0)/a.length;
+
+function ema(values,period){
+ const k=2/(period+1),out=[];
+ let v=values.slice(0,period).reduce((a,b)=>a+b,0)/period;
+ for(let i=0;i<values.length;i++){
+  if(i<period-1)out.push(null);
+  else if(i===period-1)out.push(v);
+  else{v=values[i]*k+v*(1-k);out.push(v);}
+ }
+ return out;
+}
+function calcRSI(c,period=14){
+ let gains=0,losses=0;
+ for(let i=c.length-period;i<c.length;i++){
+  const d=c[i]-c[i-1];if(d>0)gains+=d;else losses-=d;
+ }
+ if(losses===0)return 100;
+ return 100-100/(1+gains/losses);
+}
+function atr(data,period=14){
+ let trs=[];
+ for(let i=1;i<data.length;i++){
+  const c=data[i],p=data[i-1];
+  trs.push(Math.max(c.high-c.low,Math.abs(c.high-p.close),Math.abs(c.low-p.close)));
+ }
+ return mean(trs.slice(-period));
+}
+function drawChart(data){
+ const canvas=$("chart"),ctx=canvas.getContext("2d");
+ const w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);
+ if(!data.length)return;
+ const arr=data.slice(-70),lo=Math.min(...arr.map(c=>c.low)),hi=Math.max(...arr.map(c=>c.high));
+ const pad=12,range=hi-lo||1;
+ ctx.strokeStyle="#263247";ctx.lineWidth=1;
+ for(let i=0;i<5;i++){const y=pad+i*(h-2*pad)/4;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+ arr.forEach((c,i)=>{
+  const x=pad+i*(w-2*pad)/arr.length,barw=Math.max(2,(w-2*pad)/arr.length*.58);
+  const y=v=>h-pad-(v-lo)/range*(h-2*pad);
+  ctx.strokeStyle=c.close>=c.open?"#00e6a0":"#ff496c";
+  ctx.fillStyle=ctx.strokeStyle;
+  ctx.beginPath();ctx.moveTo(x+barw/2,y(c.high));ctx.lineTo(x+barw/2,y(c.low));ctx.stroke();
+  ctx.fillRect(x,y(Math.max(c.open,c.close)),barw,Math.max(1,Math.abs(y(c.open)-y(c.close))));
+ });
+}
+function backtest(data){
+ const closes=data.map(c=>c.close),e20=ema(closes,20),e50=ema(closes,50);
+ let pos=0,entry=0,trades=[],equity=1,peak=1,maxDD=0;
+ for(let i=51;i<closes.length-1;i++){
+  if(!e20[i]||!e50[i])continue;
+  const trend=e20[i]>e50[i]?1:-1;
+  if(pos===0){pos=trend;entry=closes[i];}
+  else if(trend!==pos){
+   const r=pos===1?(closes[i]-entry)/entry:(entry-closes[i])/entry;
+   trades.push(r);equity*=1+r;peak=Math.max(peak,equity);maxDD=Math.max(maxDD,(peak-equity)/peak);
+   pos=trend;entry=closes[i];
+  }
+ }
+ $("trades").textContent=trades.length;
+ $("winrate").textContent=trades.length?(100*trades.filter(x=>x>0).length/trades.length).toFixed(1)+"%":"—";
+ $("net").textContent=trades.length?((equity-1)*100).toFixed(2)+"%":"—";
