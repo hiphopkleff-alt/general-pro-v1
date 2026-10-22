@@ -462,7 +462,68 @@ Reason: ${$('reason').textContent}`;
       'Copy not supported by this browser. ' + $('reason').textContent;
   }
 });
+function calcMACD(closes) {
+if (!Array.isArray(closes) || closes.length < 35) {
+return { macd: 0, signal: 0, histogram: 0 };
+}
 
+function ema(values, period) {
+const k = 2 / (period + 1);
+let result = values[0];
+const output = [result];
+
+for (let i = 1; i < values.length; i++) {
+  result = values[i] * k + result * (1 - k);
+  output.push(result);
+}
+
+return output;
+
+}
+
+const fast = ema(closes, 12);
+const slow = ema(closes, 26);
+const macdLine = fast.map((value, i) => value - slow[i]);
+const signalLine = ema(macdLine, 9);
+const last = macdLine.length - 1;
+
+return {
+macd: macdLine[last],
+signal: signalLine[last],
+histogram: macdLine[last] - signalLine[last]
+};
+ }
+ function calcMACD(closes) {
+if (!Array.isArray(closes) || closes.length < 35) {
+return { macd: 0, signal: 0, histogram: 0 };
+}
+
+function ema(values, period) {
+const k = 2 / (period + 1);
+let result = values[0];
+const output = [result];
+
+for (let i = 1; i < values.length; i++) {
+  result = values[i] * k + result * (1 - k);
+  output.push(result);
+}
+
+return output;
+
+}
+
+const fast = ema(closes, 12);
+const slow = ema(closes, 26);
+const macdLine = fast.map((value, i) => value - slow[i]);
+const signalLine = ema(macdLine, 9);
+const last = macdLine.length - 1;
+
+return {
+macd: macdLine[last],
+signal: signalLine[last],
+histogram: macdLine[last] - signalLine[last]
+};
+}
 load();
 setInterval(load, 60000);
 </script>
