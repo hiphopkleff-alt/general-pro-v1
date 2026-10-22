@@ -1,862 +1,1069 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0b0f18">
-<title>GENERAL PRO V1.0</title><style>
-:root{
- --bg:#0b0f18;
- --panel:#141b29;
- --border:#263247;
- --text:#edf3ff;
- --muted:#91a0b8;
- --green:#00e6a0;
- --red:#ff496c;
- --blue:#58a6ff;
-}
-*{box-sizing:border-box}
-body{
- margin:0;background:var(--bg);color:var(--text);
- font-family:Arial,sans-serif
-}
-header{
- padding:18px;background:#101725;
- border-bottom:1px solid var(--border);
- position:sticky;top:0;z-index:2
-}
-.brand{font-weight:900;font-size:21px;letter-spacing:1px}
-.brand span{color:var(--green)}
-.sub{color:var(--muted);font-size:12px;margin-top:6px}
-main{max-width:1050px;margin:auto;padding:14px}
-.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
-select,button,input{
- background:#101725;color:var(--text);
- border:1px solid var(--border);
- padding:12px;border-radius:9px;font-size:14px
-}
-button{cursor:pointer}
-button:disabled{opacity:.55;cursor:wait}
-button.primary{
- background:var(--green);color:#07140f;
- font-weight:bold;border:0
-}
-.card{
- background:var(--panel);border:1px solid var(--border);
- border-radius:14px;padding:16px;margin-top:13px;
- min-width:0
-}
-.label{
- font-size:11px;color:var(--muted);
- text-transform:uppercase;letter-spacing:1px
-}
-.value{
- font-size:25px;font-weight:bold;margin-top:9px;
- overflow-wrap:anywhere
-}
-.muted{color:var(--muted)}
-.grid{
- display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
- gap:10px
-}
-.signal{font-size:24px;font-weight:900;margin-top:9px}
-.buy{color:var(--green)}
-.sell{color:var(--red)}
-.wait{color:#ffd166}
-.levels{
- display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
- gap:9px;margin-top:12px
-}
-.level{background:#0d1420;padding:12px;border-radius:9px;min-width:0}
-.level b{display:block;margin-top:6px;font-size:16px;overflow-wrap:anywhere}
-.status{
- font-size:12px;padding:8px 10px;border-radius:8px;
- background:#202a3a;color:#ffd166;display:inline-block
-}
-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:12px}
-td,th{
- padding:10px 5px;border-bottom:1px solid var(--border);
- text-align:left;overflow-wrap:anywhere
-}
-footer{text-align:center;color:var(--muted);font-size:11px;padding:25px}
-canvas{display:block;width:100%;height:180px}
-@keyframes pulse{50%{opacity:.35}}
-.blink{animation:pulse 1s infinite}
-@media(min-width:700px){
- .grid{grid-template-columns:repeat(4,minmax(0,1fr))}
- .layout{display:grid;grid-template-columns:1.2fr .8fr;gap:12px}
- .layout .card{margin-top:13px}
- .layout .wide{grid-column:1/-1}
-}
-@media(max-width:380px){
- .value{font-size:21px}
- .levels{grid-template-columns:1fr}
- .brand{font-size:18px}
- select,button{max-width:100%}
-}
-</style></head><body><header>
- <div class="brand">GENERAL <span>PRO</span> V1.0</div>
- <div class="sub">LIVE MARKET INTELLIGENCE · SIGNALS ONLY · NO TRADE EXECUTION</div>
-</header><main> <div class="row" style="margin-top:12px">
-  <select id="symbol" aria-label="Select market">
-   <option>BTC/USD</option>
-   <option>ETH/USD</option>
-   <option>SOL/USD</option>
-   <option>EUR/USD</option>
-   <option>GBP/USD</option>
-   <option>USD/JPY</option>
-   <option>XAU/USD</option>
-   <option>XAG/USD</option>
-  </select>  <select id="tf" aria-label="Select timeframe">
-   <option value="15m">15 Minutes</option>
-   <option value="1h" selected>1 Hour</option>
-   <option value="4h">4 Hours</option>
-   <option value="1d">1 Day</option>
-  </select><button class="primary" id="refresh">↻ Refresh</button>
-<button id="sound">🔕 Sound off</button>
+<meta name="application-name" content="GENERAL PRO V1.0">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="icon" type="image/png" href="/icon.png">
+<link rel="apple-touch-icon" href="/icon.png">
+<title>GENERAL PRO V1.0</title>
 
- </div> <div class="card">
-  <div class="row" style="justify-content:space-between">
-   <div>
-    <div class="label">Selected market</div>
-    <div class="value" id="market">BTC/USD</div>
-   </div>
-   <div>
-    <div class="label">Latest candle price</div>
-    <div class="value" id="price">—</div>
-   </div>
-  </div>  <div style="margin-top:12px">
-   <span id="status" class="status">Connecting to market data…</span>
-  </div>  <div class="sub" id="updated">Waiting for market data.</div>
- </div> <div class="layout">  <div class="card">
-   <div class="label">Market signal</div>
-   <div id="signal" class="signal wait">WAITING FOR DATA</div>   <p class="muted" id="reason">
-    A signal will be calculated after sufficient market candles arrive.
-   </p>   <div class="label" style="margin-top:18px">Indicator alignment score</div>
-   <div class="value" id="confidence">—</div>   <div style="height:7px;background:#273145;border-radius:10px;margin-top:9px;overflow:hidden">
-    <div id="bar" style="height:100%;width:0;background:var(--blue)"></div>
-   </div>   <p class="sub">
-    This score measures indicator agreement. It is not a probability of profit.
-   </p>   <div class="grid">
-    <div>
-     <div class="label">EMA 20</div>
-     <div id="ema20" class="value">—</div>
-    </div>
-    <div>
-     <div class="label">EMA 50</div>
-     <div id="ema50" class="value">—</div>
-    </div>
-    <div>
-     <div class="label">RSI 14</div>
-     <div id="rsi" class="value">—</div>
-    </div>
-    <div>
-     <div class="label">MACD histogram</div>
-     <div id="macd" class="value">—</div>
-    </div>
-   </div>
-  </div>  <div class="card">
-   <div class="label">Signal levels</div>   <div class="levels">
-    <div class="level">
-     <span class="label">Entry</span>
-     <b id="entry">—</b>
-    </div>
-    <div class="level">
-     <span class="label">Stop loss</span>
-     <b id="sl">—</b>
-    </div>
-    <div class="level">
-     <span class="label">Risk / reward</span>
-     <b id="rr">—</b>
-    </div>
-    <div class="level">
-     <span class="label">Take profit 1</span>
-     <b id="tp1">—</b>
-    </div>
-    <div class="level">
-     <span class="label">Take profit 2</span>
-     <b id="tp2">—</b>
-    </div>
-    <div class="level">
-     <span class="label">Take profit 3</span>
-     <b id="tp3">—</b>
-    </div>
-   </div><button style="width:100%;margin-top:12px" id="copy">Copy signal</button>
+<style>
+:root {
+  --bg:#0b0f18;
+  --panel:#141b29;
+  --panel2:#101725;
+  --border:#263247;
+  --text:#edf3ff;
+  --muted:#91a0b8;
+  --green:#00e6a0;
+  --red:#ff496c;
+  --yellow:#ffd166;
+  --blue:#58a6ff;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Arial,sans-serif;
+}
+header {
+  background:#101725;
+  border-bottom:1px solid var(--border);
+  padding:16px;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+.headerrow {
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.logo {
+  width:43px;
+  height:43px;
+  object-fit:contain;
+  border-radius:12px;
+  background:#202a3a;
+}
+.brand {
+  font-size:20px;
+  font-weight:900;
+  letter-spacing:.5px;
+}
+.brand span { color:var(--green); }
+.subtitle {
+  color:var(--muted);
+  font-size:10px;
+  margin-top:5px;
+}
+main {
+  max-width:1050px;
+  margin:auto;
+  padding:13px;
+}
+select,button,input {
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--panel2);
+  color:var(--text);
+  padding:12px;
+  font-size:14px;
+}
+button { cursor:pointer; }
+button:active { transform:scale(.98); }
+.primary {
+  background:var(--green);
+  color:#07140f;
+  font-weight:bold;
+  border:0;
+}
+.toolbar {
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin:12px 0;
+}
+.toolbar select { flex:1; min-width:130px; }
+.card {
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:12px;
+}
+.label {
+  color:var(--muted);
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+}
+.small { color:var(--muted); font-size:12px; }
+.big {
+  font-size:25px;
+  font-weight:900;
+  margin-top:7px;
+  overflow-wrap:anywhere;
+}
+.status {
+  display:inline-block;
+  background:#202a3a;
+  color:var(--yellow);
+  padding:7px 9px;
+  border-radius:8px;
+  font-size:11px;
+}
+.sectiontitle {
+  font-size:16px;
+  font-weight:800;
+  margin-bottom:12px;
+}
+.marketlist {
+  display:grid;
+  gap:9px;
+}
+.marketrow {
+  display:block;
+  width:100%;
+  text-align:left;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-left:4px solid var(--blue);
+  border-radius:12px;
+  padding:13px;
+  color:var(--text);
+}
+.marketrow.active { border-color:var(--green); }
+.markettop {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+}
+.pair { font-size:16px; font-weight:900; }
+.price { font-size:15px; font-weight:bold; }
+.marketbottom {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+  margin-top:13px;
+}
+.score {
+  padding:8px 5px;
+  background:#0d1420;
+  border-radius:8px;
+  text-align:center;
+  font-size:12px;
+  font-weight:bold;
+}
+.score span {
+  display:block;
+  font-size:10px;
+  color:var(--muted);
+  margin-bottom:5px;
+}
+.buy { color:var(--green); }
+.sell { color:var(--red); }
+.neutral { color:var(--yellow); }
+.strongbuy { color:var(--green); }
+.strongsell { color:var(--red); }
+.weak { color:var(--yellow); }
+@keyframes blink {
+  50% { opacity:.3; }
+}
+.blink { animation:blink .8s infinite; }
+.signal {
+  font-size:25px;
+  font-weight:900;
+  margin:10px 0;
+}
+.grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+}
+.metric {
+  background:#0d1420;
+  border-radius:10px;
+  padding:12px;
+  min-width:0;
+}
+.metric .number {
+  font-size:18px;
+  font-weight:bold;
+  margin-top:7px;
+  overflow-wrap:anywhere;
+}
+.levels {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin-top:12px;
+}
+.level {
+  padding:12px;
+  background:#0d1420;
+  border-radius:9px;
+}
+.level b {
+  display:block;
+  margin-top:7px;
+  font-size:16px;
+  overflow-wrap:anywhere;
+}
+canvas {
+  display:block;
+  width:100%;
+  height:190px;
+}
+.hidden { display:none !important; }
+table {
+  width:100%;
+  border-collapse:collapse;
+  font-size:12px;
+}
+th,td {
+  padding:10px 5px;
+  border-bottom:1px solid var(--border);
+  text-align:left;
+}
+.tablewrap { overflow-x:auto; }
+footer {
+  text-align:center;
+  color:var(--muted);
+  font-size:11px;
+  padding:18px;
+}
+@media(min-width:700px) {
+  .marketlist { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .detailgrid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+}
+@media(max-width:380px) {
+  .brand { font-size:17px; }
+  .big { font-size:21px; }
+  .marketbottom { gap:4px; }
+  .score { font-size:11px; }
+}
+</style>
+</head>
 
-   <p class="sub" id="signalTime">No signal calculated yet.</p>
-  </div>  <div class="card wide">
-   <div class="row" style="justify-content:space-between">
-    <div>
-     <div class="label">Price history</div>
-     <div class="sub">Recent candles received from the data provider</div>
-    </div>
-    <div class="label" id="source">Source: —</div>
-   </div><canvas id="chart" width="900" height="180"></canvas>
+<body>
 
-  </div>  <div class="card">
-   <div class="label">Historical backtest</div>
-   <div class="sub">
-    Simple EMA 20/50 crossover test. Historical results do not guarantee future performance.
-   </div>   <div class="grid" style="margin-top:15px">
+<header>
+  <div class="headerrow">
+    <img class="logo" src="/icon.png" alt="GENERAL PRO icon"
+         onerror="this.style.display='none'">
     <div>
-     <div class="label">Closed trades</div>
-     <div id="trades" class="value">—</div>
+      <div class="brand">GENERAL <span>PRO</span> V1.0</div>
+      <div class="subtitle">LIVE MARKET INTELLIGENCE · SIGNALS ONLY</div>
     </div>
-    <div>
-     <div class="label">Win rate</div>
-     <div id="winrate" class="value">—</div>
+  </div>
+</header>
+
+<main>
+
+  <div class="toolbar">
+    <select id="category" aria-label="Market category">
+      <option value="FOREX">FOREX</option>
+      <option value="CRYPTO">CRYPTO</option>
+      <option value="OTHER">OTHER</option>
+    </select>
+
+    <select id="timeframe" aria-label="Chart timeframe">
+      <option value="15min">15 Minutes</option>
+      <option value="1h" selected>1 Hour</option>
+      <option value="4h">4 Hours</option>
+      <option value="1day">1 Day</option>
+    </select>
+
+    <button class="primary" id="refresh">↻ Refresh</button>
+  </div>
+
+  <section class="card">
+    <div class="markettop">
+      <div>
+        <div class="label">Market scanner</div>
+        <div class="big" id="marketCount">Loading markets…</div>
+      </div>
+      <span class="status" id="connection">Connecting…</span>
     </div>
-    <div>
-     <div class="label">Net return</div>
-     <div id="net" class="value">—</div>
+    <p class="small" id="lastUpdated">
+      Waiting for market data.
+    </p>
+  </section>
+
+  <section class="card">
+    <div class="sectiontitle" id="listTitle">CRYPTO MARKETS</div>
+    <p class="small">
+      Tap any market to open its complete analysis.
+      Scores are based on technical indicator alignment.
+    </p>
+    <div id="marketList" class="marketlist">
+      <div class="small">Loading market pairs…</div>
     </div>
-    <div>
-     <div class="label">Max drawdown</div>
-     <div id="dd" class="value">—</div>
+  </section>
+
+  <section id="details" class="hidden">
+    <div class="card">
+      <div class="markettop">
+        <div>
+          <div class="label">Selected market</div>
+          <div class="big" id="selectedPair">—</div>
+        </div>
+        <div style="text-align:right">
+          <div class="label">Current price</div>
+          <div class="big" id="currentPrice">—</div>
+        </div>
+      </div>
+      <p class="small" id="detailStatus">Select a market.</p>
     </div>
-   </div>   <p class="sub" id="btNote">Backtest will run when enough candles are available.</p>
-  </div> </div> <div class="card">
-  <div class="label">Signal log</div>  <table>
-   <thead>
-    <tr>
-     <th>Time</th>
-     <th>Market</th>
-     <th>Signal</th>
-     <th>Price</th>
-    </tr>
-   </thead>
-   <tbody id="log">
-    <tr><td colspan="4" class="muted">No signals yet.</td></tr>
-   </tbody>
-  </table>
- </div> <p class="sub">
-  Data availability depends on the provider, symbol support, quotas and subscription.
-  Signals are technical analysis only and are not guaranteed to be profitable.
- </p></main><footer>
- GENERAL PRO V1.0 · Market analysis only · Not financial advice
-</footer><script>
+
+    <div class="detailgrid">
+      <div class="card">
+        <div class="label">Technical signal</div>
+        <div class="signal neutral" id="signal">WAIT</div>
+        <p class="small" id="reason">Waiting for indicators.</p>
+
+        <div class="grid">
+          <div class="metric">
+            <div class="label">BUY score</div>
+            <div class="number buy" id="buyScore">—</div>
+          </div>
+          <div class="metric">
+            <div class="label">SELL score</div>
+            <div class="number sell" id="sellScore">—</div>
+          </div>
+          <div class="metric">
+            <div class="label">Neutral score</div>
+            <div class="number neutral" id="neutralScore">—</div>
+          </div>
+          <div class="metric">
+            <div class="label">Indicator alignment</div>
+            <div class="number" id="alignment">—</div>
+          </div>
+        </div>
+        <p class="small">
+          Scores are analytical estimates, not a probability of profit.
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="sectiontitle">Entry, SL & Take Profit</div>
+        <div class="levels">
+          <div class="level">
+            <div class="label">Entry price</div>
+            <b id="entry">—</b>
+          </div>
+          <div class="level">
+            <div class="label">Stop loss</div>
+            <b id="sl">—</b>
+          </div>
+          <div class="level">
+            <div class="label">Take profit 1</div>
+            <b id="tp1">—</b>
+          </div>
+          <div class="level">
+            <div class="label">Take profit 2</div>
+            <b id="tp2">—</b>
+          </div>
+          <div class="level">
+            <div class="label">Take profit 3</div>
+            <b id="tp3">—</b>
+          </div>
+          <div class="level">
+            <div class="label">Risk / reward</div>
+            <b id="rr">—</b>
+          </div>
+        </div>
+        <button id="copySignal" style="width:100%;margin-top:12px">
+          Copy market analysis
+        </button>
+        <p class="small" id="signalTime">—</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sectiontitle">Price chart</div>
+      <canvas id="chart" width="900" height="220"></canvas>
+      <div class="small" id="chartInfo">Waiting for candles.</div>
+    </div>
+
+    <div class="card">
+      <div class="sectiontitle">Technical indicators</div>
+      <div class="grid">
+        <div class="metric">
+          <div class="label">EMA 20</div>
+          <div class="number" id="ema20">—</div>
+        </div>
+        <div class="metric">
+          <div class="label">EMA 50</div>
+          <div class="number" id="ema50">—</div>
+        </div>
+        <div class="metric">
+          <div class="label">RSI 14</div>
+          <div class="number" id="rsi">—</div>
+        </div>
+        <div class="metric">
+          <div class="label">MACD</div>
+          <div class="number" id="macd">—</div>
+        </div>
+        <div class="metric">
+          <div class="label">ATR 14</div>
+          <div class="number" id="atr">—</div>
+        </div>
+        <div class="metric">
+          <div class="label">Candles received</div>
+          <div class="number" id="candleCount">—</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="sectiontitle">Recent signal history</div>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Pair</th>
+            <th>Signal</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody id="history">
+          <tr><td colspan="4">No signals recorded yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <p class="small">
+    Market data depends on provider availability, supported symbols and API
+    limits. If data is unavailable, this dashboard will show an error instead
+    of inventing prices. Signals are technical analysis only, not financial
+    advice or a guarantee of results.
+  </p>
+
+</main>
+
+<footer>GENERAL PRO V1.0 · Market analysis only · No trade execution</footer>
+
+<script>
 "use strict";
 
 const $ = id => document.getElementById(id);
 
-let candles = [];
-let lastSignal = "";
-let soundOn = false;
-let audioCtx = null;
-let logItems = [];
-let loading = false;
-
-const mean = values =>
- values.length
-  ? values.reduce((sum, value) => sum + value, 0) / values.length
-  : 0;
-
-const fmt = number => {
- if (number === null || number === undefined || !Number.isFinite(number)) {
-  return "—";
- }
- return number.toLocaleString("en-US", {
-  maximumFractionDigits: number >= 1000 ? 2 :
-                         number >= 1 ? 4 : 7
- });
+const MARKETS = {
+  CRYPTO: [
+    { name:"BTC/USD", label:"BTCUSD" },
+    { name:"ETH/USD", label:"ETHUSD" },
+    { name:"BTC/USDT", label:"BTCUSDT" },
+    { name:"ETH/USDT", label:"ETHUSDT" },
+    { name:"SOL/USD", label:"SOLUSD" },
+    { name:"XRP/USD", label:"XRPUSD" },
+    { name:"BNB/USD", label:"BNBUSD" },
+    { name:"ADA/USD", label:"ADAUSD" },
+    { name:"DOGE/USD", label:"DOGEUSD" },
+    { name:"LTC/USD", label:"LTCUSD" }
+  ],
+  FOREX: [
+    { name:"EUR/USD", label:"EURUSD" },
+    { name:"GBP/USD", label:"GBPUSD" },
+    { name:"USD/JPY", label:"USDJPY" },
+    { name:"USD/CHF", label:"USDCHF" },
+    { name:"AUD/USD", label:"AUDUSD" },
+    { name:"NZD/USD", label:"NZDUSD" },
+    { name:"USD/CAD", label:"USDCAD" },
+    { name:"EUR/GBP", label:"EURGBP" },
+    { name:"EUR/JPY", label:"EURJPY" },
+    { name:"GBP/JPY", label:"GBPJPY" }
+  ],
+  OTHER: [
+    { name:"XAU/USD", label:"GOLD" },
+    { name:"XAG/USD", label:"SILVER" },
+    { name:"WTI/USD", label:"WTI OIL" },
+    { name:"BRENT/USD", label:"BRENT OIL" }
+  ]
 };
 
+let selectedCategory = "FOREX";
+let selectedMarket = "EUR/USD";
+let candles = [];
+let analysis = null;
+let marketResults = {};
+let requestSequence = 0;
+let historyItems = [];
+let lastStrongSignal = "";
+
+function fmt(n, symbol) {
+  if (!Number.isFinite(n)) return "—";
+  const digits = Math.abs(n) >= 1000 ? 2 :
+                 Math.abs(n) >= 10 ? 3 : 5;
+  return n.toLocaleString("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: digits
+  });
+}
+
+function setText(id, value) {
+  $(id).textContent = value;
+}
+
+function setConnection(message, ok) {
+  setText("connection", message);
+  $("connection").style.color = ok ? "var(--green)" : "var(--yellow)";
+}
+
+function mean(arr) {
+  return arr.length
+    ? arr.reduce((sum, value) => sum + value, 0) / arr.length
+    : NaN;
+}
+
 function ema(values, period) {
- if (!Array.isArray(values) || values.length < period) {
-  return values.map(() => null);
- }
+  if (values.length < period) return [];
+  const result = [];
+  const k = 2 / (period + 1);
+  let current = mean(values.slice(0, period));
 
- const k = 2 / (period + 1);
- const output = [];
- let value = mean(values.slice(0, period));
-
- for (let i = 0; i < values.length; i++) {
-  if (i < period - 1) {
-   output.push(null);
-  } else if (i === period - 1) {
-   output.push(value);
-  } else {
-   value = values[i] * k + value * (1 - k);
-   output.push(value);
+  for (let i = 0; i < values.length; i++) {
+    if (i < period - 1) {
+      result.push(null);
+    } else if (i === period - 1) {
+      result.push(current);
+    } else {
+      current = values[i] * k + current * (1 - k);
+      result.push(current);
+    }
   }
- }
-
- return output;
+  return result;
 }
 
 function calcRSI(closes, period = 14) {
- if (!Array.isArray(closes) || closes.length <= period) {
-  return null;
- }
+  if (closes.length <= period) return NaN;
 
- let gains = 0;
- let losses = 0;
+  let gains = 0;
+  let losses = 0;
 
- for (let i = closes.length - period; i < closes.length; i++) {
-  const difference = closes[i] - closes[i - 1];
-
-  if (difference > 0) {
-   gains += difference;
-  } else {
-   losses -= difference;
+  for (let i = closes.length - period; i < closes.length; i++) {
+    const change = closes[i] - closes[i - 1];
+    if (change > 0) gains += change;
+    else losses -= change;
   }
- }
 
- if (gains === 0 && losses === 0) return 50;
- if (losses === 0) return 100;
- if (gains === 0) return 0;
-
- const averageGain = gains / period;
- const averageLoss = losses / period;
-
- return 100 - 100 / (1 + averageGain / averageLoss);
+  if (losses === 0) return gains === 0 ? 50 : 100;
+  const rs = gains / losses;
+  return 100 - 100 / (1 + rs);
 }
 
 function calcMACD(closes) {
- if (!Array.isArray(closes) || closes.length < 35) {
-  return null;
- }
+  if (closes.length < 35) return NaN;
 
- const fast = ema(closes, 12);
- const slow = ema(closes, 26);
+  const fast = ema(closes, 12);
+  const slow = ema(closes, 26);
+  const lines = [];
 
- const macdLine = fast.map((value, index) => {
-  if (value === null || slow[index] === null) return null;
-  return value - slow[index];
- });
+  for (let i = 0; i < closes.length; i++) {
+    lines.push(
+      fast[i] !== null && slow[i] !== null &&
+      Number.isFinite(fast[i]) && Number.isFinite(slow[i])
+        ? fast[i] - slow[i]
+        : null
+    );
+  }
 
- const validLine = macdLine.filter(Number.isFinite);
+  const valid = lines.filter(Number.isFinite);
+  if (valid.length < 9) return NaN;
 
- if (validLine.length < 9) return null;
+  const signal = ema(valid, 9);
+  const macdLine = valid[valid.length - 1];
+  const signalLine = signal[signal.length - 1];
 
- const signalLine = ema(macdLine.map(value =>
-  value === null ? 0 : value
- ), 9);
-
- const lastIndex = macdLine.length - 1;
- const macdValue = macdLine[lastIndex];
- const signalValue = signalLine[lastIndex];
-
- if (!Number.isFinite(macdValue) || !Number.isFinite(signalValue)) {
-  return null;
- }
-
- return macdValue - signalValue;
+  return macdLine - signalLine;
 }
 
-function atr(data, period = 14) {
- if (!Array.isArray(data) || data.length < 2) return null;
+function calcATR(data, period = 14) {
+  if (data.length < period + 1) return NaN;
+  const ranges = [];
 
- const trueRanges = [];
+  for (let i = 1; i < data.length; i++) {
+    const current = data[i];
+    const previous = data[i - 1];
+    ranges.push(Math.max(
+      current.high - current.low,
+      Math.abs(current.high - previous.close),
+      Math.abs(current.low - previous.close)
+    ));
+  }
 
- for (let i = 1; i < data.length; i++) {
-  const current = data[i];
-  const previous = data[i - 1];
+  return mean(ranges.slice(-period));
+}
 
-  trueRanges.push(Math.max(
-   current.high - current.low,
-   Math.abs(current.high - previous.close),
-   Math.abs(current.low - previous.close)
-  ));
- }
+function calculateAnalysis(data) {
+  if (!Array.isArray(data) || data.length < 55) {
+    throw new Error("Not enough candles received. At least 55 are needed.");
+  }
 
- const recent = trueRanges.slice(-period);
- return recent.length ? mean(recent) : null;
+  const closes = data.map(c => Number(c.close));
+  const e20 = ema(closes, 20);
+  const e50 = ema(closes, 50);
+  const price = closes[closes.length - 1];
+  const fast = e20[e20.length - 1];
+  const slow = e50[e50.length - 1];
+  const rsi = calcRSI(closes);
+  const macd = calcMACD(closes);
+  const atr = calcATR(data);
+
+  if (![price, fast, slow, rsi, macd, atr].every(Number.isFinite)) {
+    throw new Error("Indicators could not be calculated from this data.");
+  }
+
+  let buy = 0;
+  let sell = 0;
+
+  if (fast > slow) buy += 30;
+  else if (fast < slow) sell += 30;
+
+  if (price > fast) buy += 20;
+  else if (price < fast) sell += 20;
+
+  if (rsi >= 52 && rsi < 70) buy += 20;
+  else if (rsi <= 48 && rsi > 30) sell += 20;
+
+  if (macd > 0) buy += 30;
+  else if (macd < 0) sell += 30;
+
+  const total = buy + sell;
+  const neutral = Math.max(0, 100 - total);
+  let signal = "WAIT";
+  let reason = "Indicators are mixed; wait for clearer alignment.";
+
+  if (buy >= 80 && buy > sell && rsi < 75) {
+    signal = "STRONG BUY";
+    reason = "Bullish trend and momentum indicators are aligned.";
+  } else if (sell >= 80 && sell > buy && rsi > 25) {
+    signal = "STRONG SELL";
+    reason = "Bearish trend and momentum indicators are aligned.";
+  } else if (buy >= 50 && buy > sell) {
+    signal = "WEAK BUY";
+    reason = "Some bullish indicators agree, but confirmation is limited.";
+  } else if (sell >= 50 && sell > buy) {
+    signal = "WEAK SELL";
+    reason = "Some bearish indicators agree, but confirmation is limited.";
+  }
+
+  const direction = signal.includes("BUY") ? 1 :
+                    signal.includes("SELL") ? -1 : 0;
+
+  // Levels are calculated even for WAIT, for reference only.
+  const risk = Math.max(atr * 1.5, price * 0.0005);
+  const entry = price;
+  const sl = direction >= 0 ? price - risk : price + risk;
+  const tp1 = direction >= 0 ? price + risk : price - risk;
+  const tp2 = direction >= 0 ? price + risk * 2 : price - risk * 2;
+  const tp3 = direction >= 0 ? price + risk * 3 : price - risk * 3;
+
+  return {
+    price, e20:fast, e50:slow, rsi, macd, atr,
+    buy, sell, neutral, signal, reason,
+    alignment:Math.max(buy, sell),
+    entry, sl, tp1, tp2, tp3,
+    rr:"1:1 / 1:2 / 1:3",
+    direction
+  };
+}
+
+function normalizeCandles(payload) {
+  let list = Array.isArray(payload) ? payload :
+             Array.isArray(payload.candles) ? payload.candles :
+             Array.isArray(payload.values) ? payload.values : null;
+
+  if (!list) {
+    throw new Error("The market-data response did not contain candles.");
+  }
+
+  const result = list.map(c => ({
+    time: c.datetime || c.time || c.date || "",
+    open: Number(c.open),
+    high: Number(c.high),
+    low: Number(c.low),
+    close: Number(c.close)
+  })).filter(c =>
+    Number.isFinite(c.open) &&
+    Number.isFinite(c.high) &&
+    Number.isFinite(c.low) &&
+    Number.isFinite(c.close)
+  );
+
+  // Many providers return newest candle first.
+  if (result.length > 1 && result[0].time && result[result.length - 1].time) {
+    if (String(result[0].time) > String(result[result.length - 1].time)) {
+      result.reverse();
+    }
+  }
+
+  return result;
+}
+
+async function getCandles(symbol, timeframe) {
+  const url = "/api/candles?symbol=" +
+    encodeURIComponent(symbol) +
+    "&interval=" + encodeURIComponent(timeframe) +
+    "&limit=100";
+
+  const response = await fetch(url, { cache:"no-store" });
+  if (!response.ok) {
+    throw new Error("Market API returned HTTP " + response.status);
+  }
+
+  const json = await response.json();
+
+  if (json && json.error) {
+    throw new Error(typeof json.error === "string"
+      ? json.error
+      : "The market-data provider returned an error.");
+  }
+
+  return normalizeCandles(json);
+}
+
+function scoreLabel(result) {
+  if (!result) return "WAIT";
+  return result.signal;
+}
+
+function scoreClass(signal) {
+  if (signal === "STRONG BUY") return "strongbuy blink";
+  if (signal === "STRONG SELL") return "strongsell blink";
+  if (signal.includes("BUY")) return "buy";
+  if (signal.includes("SELL")) return "sell";
+  return "neutral";
+}
+
+function renderMarkets() {
+  const list = $("marketList");
+  const markets = MARKETS[selectedCategory] || [];
+
+  setText("listTitle", selectedCategory + " MARKETS");
+  setText("marketCount", markets.length + " pairs");
+
+  list.innerHTML = "";
+
+  markets.forEach(market => {
+    const result = marketResults[market.name];
+    const row = document.createElement("button");
+    row.className = "marketrow" +
+      (selectedMarket === market.name ? " active" : "");
+    row.type = "button";
+
+    const top = document.createElement("div");
+    top.className = "markettop";
+
+    const pair = document.createElement("span");
+    pair.className = "pair";
+    pair.textContent = market.label;
+
+    const price = document.createElement("span");
+    price.className = "price";
+    price.textContent = result ? fmt(result.price) : "Loading…";
+
+    top.append(pair, price);
+
+    const bottom = document.createElement("div");
+    bottom.className = "marketbottom";
+
+    const scores = [
+      ["BUY", result ? result.buy : null, "buy"],
+      ["SELL", result ? result.sell : null, "sell"],
+      [result ? scoreLabel(result) : "NEUTRAL",
+       result ? result.neutral : null,
+       result ? scoreClass(result.signal) : "neutral"]
+    ];
+
+    scores.forEach(item => {
+      const cell = document.createElement("div");
+      cell.className = "score " + item[2];
+
+      const label = document.createElement("span");
+      label.textContent = item[0];
+
+      const value = document.createElement("strong");
+      value.textContent = item[1] === null ? "—" : item[1] + "%";
+
+      cell.append(label, value);
+      bottom.appendChild(cell);
+    });
+
+    row.append(top, bottom);
+    row.addEventListener("click", () => {
+      selectedMarket = market.name;
+      $("details").classList.remove("hidden");
+      renderMarkets();
+      loadSelectedMarket();
+      $("details").scrollIntoView({ behavior:"smooth", block:"start" });
+    });
+
+    list.appendChild(row);
+  });
 }
 
 function drawChart(data) {
- const canvas = $("chart");
- const ctx = canvas.getContext("2d");
- const width = canvas.width;
- const height = canvas.height;
+  const canvas = $("chart");
+  const ctx = canvas.getContext("2d");
+  const width = canvas.width;
+  const height = canvas.height;
+  ctx.clearRect(0, 0, width, height);
 
- ctx.clearRect(0, 0, width, height);
+  if (!data.length) return;
 
- if (!Array.isArray(data) || !data.length) return;
+  const arr = data.slice(-65);
+  const low = Math.min(...arr.map(c => c.low));
+  const high = Math.max(...arr.map(c => c.high));
+  const range = high - low || 1;
+  const pad = 12;
 
- const recent = data.slice(-70);
- const low = Math.min(...recent.map(candle => candle.low));
- const high = Math.max(...recent.map(candle => candle.high));
- const range = high - low || 1;
- const padding = 12;
+  ctx.strokeStyle = "#263247";
+  ctx.lineWidth = 1;
 
- ctx.strokeStyle = "#263247";
- ctx.lineWidth = 1;
-
- for (let i = 0; i < 5; i++) {
-  const y = padding + i * (height - 2 * padding) / 4;
-  ctx.beginPath();
-  ctx.moveTo(0, y);
-  ctx.lineTo(width, y);
-  ctx.stroke();
- }
-
- recent.forEach((candle, index) => {
-  const slot = (width - 2 * padding) / recent.length;
-  const x = padding + index * slot;
-  const barWidth = Math.max(2, slot * 0.58);
-
-  const y = value =>
-   height - padding -
-   ((value - low) / range) * (height - 2 * padding);
-
-  const color = candle.close >= candle.open ? "#00e6a0" : "#ff496c";
-
-  ctx.strokeStyle = color;
-  ctx.fillStyle = color;
-
-  ctx.beginPath();
-  ctx.moveTo(x + barWidth / 2, y(candle.high));
-  ctx.lineTo(x + barWidth / 2, y(candle.low));
-  ctx.stroke();
-
-  ctx.fillRect(
-   x,
-   y(Math.max(candle.open, candle.close)),
-   barWidth,
-   Math.max(1, Math.abs(y(candle.open) - y(candle.close)))
-  );
- });
-}
-
-function backtest(data) {
- const closes = data.map(candle => candle.close);
- const ema20 = ema(closes, 20);
- const ema50 = ema(closes, 50);
-
- let position = 0;
- let entryPrice = 0;
- let equity = 1;
- let peak = 1;
- let maxDrawdown = 0;
- const results = [];
-
- for (let i = 50; i < closes.length; i++) {
-  if (ema20[i] === null || ema50[i] === null) continue;
-
-  const trend = ema20[i] > ema50[i] ? 1 : -1;
-
-  if (position === 0) {
-   position = trend;
-   entryPrice = closes[i];
-   continue;
+  for (let i = 0; i < 5; i++) {
+    const y = pad + i * (height - 2 * pad) / 4;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
   }
 
-  if (trend !== position) {
-   const result = position === 1
-    ? (closes[i] - entryPrice) / entryPrice
-    : (entryPrice - closes[i]) / entryPrice;
+  arr.forEach((c, i) => {
+    const x = pad + i * (width - 2 * pad) / arr.length;
+    const barWidth = Math.max(2, (width - 2 * pad) / arr.length * .58);
+    const y = value =>
+      height - pad - (value - low) / range * (height - 2 * pad);
 
-   results.push(result);
-   equity *= 1 + result;
-   peak = Math.max(peak, equity);
-   maxDrawdown = Math.max(
-    maxDrawdown,
-    peak > 0 ? (peak - equity) / peak : 0
-   );
+    const color = c.close >= c.open ? "#00e6a0" : "#ff496c";
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
 
-   position = trend;
-   entryPrice = closes[i];
-  }
- }
+    ctx.beginPath();
+    ctx.moveTo(x + barWidth / 2, y(c.high));
+    ctx.lineTo(x + barWidth / 2, y(c.low));
+    ctx.stroke();
 
- $("trades").textContent = results.length;
- $("winrate").textContent = results.length
-  ? (100 * results.filter(result => result > 0).length /
-     results.length).toFixed(1) + "%"
-  : "—";
-
- $("net").textContent = results.length
-  ? ((equity - 1) * 100).toFixed(2) + "%"
-  : "—";
-
- $("dd").textContent = results.length
-  ? (maxDrawdown * 100).toFixed(2) + "%"
-  : "—";
-
- $("btNote").textContent =
-  "Based on " + data.length +
-  " candles. Fees, slippage and open positions are excluded.";
+    ctx.fillRect(
+      x,
+      y(Math.max(c.open, c.close)),
+      barWidth,
+      Math.max(1, Math.abs(y(c.open) - y(c.close)))
+    );
+  });
 }
 
-function addLog(signal, price) {
- logItems.unshift({
-  time: new Date().toLocaleTimeString(),
-  market: $("symbol").value,
-  signal,
-  price
- });
+function recordHistory(symbol, result) {
+  if (!result) return;
 
- logItems = logItems.slice(0, 15);
+  const key = symbol + "|" + result.signal + "|" +
+              result.price.toPrecision(8);
+  if (historyItems[0] && historyItems[0].key === key) return;
 
- $("log").innerHTML = "";
+  historyItems.unshift({
+    key,
+    time:new Date().toLocaleTimeString(),
+    symbol,
+    signal:result.signal,
+    price:result.price
+  });
 
- logItems.forEach(item => {
-  const row = document.createElement("tr");
-  const timeCell = document.createElement("td");
-  const marketCell = document.createElement("td");
-  const signalCell = document.createElement("td");
-  const priceCell = document.createElement("td");
+  historyItems = historyItems.slice(0, 12);
 
-  timeCell.textContent = item.time;
-  marketCell.textContent = item.market;
-  signalCell.textContent = item.signal;
-  signalCell.className = item.signal.includes("BUY") ? "buy" : "sell";
-  priceCell.textContent = fmt(item.price);
+  const tbody = $("history");
+  tbody.innerHTML = "";
 
-  row.append(timeCell, marketCell, signalCell, priceCell);
-  $("log").appendChild(row);
- });
+  historyItems.forEach(item => {
+    const tr = document.createElement("tr");
+    [item.time, item.symbol, item.signal, fmt(item.price)].forEach((value, i) => {
+      const td = document.createElement("td");
+      td.textContent = value;
+      if (i === 2) td.className = scoreClass(item.signal);
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
 }
 
-function makeSignal(data) {
- const closes = data.map(candle => candle.close);
- const price = closes[closes.length - 1];
+function showAnalysis(symbol, data, result) {
+  candles = data;
+  analysis = result;
 
- const ema20Values = ema(closes, 20);
- const ema50Values = ema(closes, 50);
+  setText("selectedPair", symbol.replace("/", ""));
+  setText("currentPrice", fmt(result.price));
+  setText("detailStatus", "Live candle data received.");
+  setText("signal", result.signal);
+  $("signal").className = "signal " + scoreClass(result.signal);
+  setText("reason", result.reason);
 
- const ema20 = ema20Values[ema20Values.length - 1];
- const ema50 = ema50Values[ema50Values.length - 1];
+  setText("buyScore", result.buy + "%");
+  setText("sellScore", result.sell + "%");
+  setText("neutralScore", result.neutral + "%");
+  setText("alignment", result.alignment + "%");
 
- const rsi = calcRSI(closes);
- const macd = calcMACD(closes);
- const volatility = atr(data);
+  setText("entry", fmt(result.entry));
+  setText("sl", fmt(result.sl));
+  setText("tp1", fmt(result.tp1));
+  setText("tp2", fmt(result.tp2));
+  setText("tp3", fmt(result.tp3));
+  setText("rr", result.rr);
 
- let score = 0;
- const reasons = [];
+  setText("ema20", fmt(result.e20));
+  setText("ema50", fmt(result.e50));
+  setText("rsi", result.rsi.toFixed(2));
+  setText("macd", fmt(result.macd));
+  setText("atr", fmt(result.atr));
+  setText("candleCount", String(data.length));
 
- if (ema20 !== null && ema50 !== null) {
-  if (ema20 > ema50) {
-   score++;
-   reasons.push("EMA20 above EMA50");
-  } else if (ema20 < ema50) {
-   score--;
-   reasons.push("EMA20 below EMA50");
-  }
- }
-
- if (rsi !== null) {
-  if (rsi >= 52 && rsi < 70) {
-   score++;
-   reasons.push("RSI bullish");
-  } else if (rsi <= 48 && rsi > 30) {
-   score--;
-   reasons.push("RSI bearish");
-  } else {
-   reasons.push("RSI neutral or extended");
-  }
- }
-
- if (macd !== null) {
-  if (macd > 0) {
-   score++;
-   reasons.push("MACD histogram positive");
-  } else if (macd < 0) {
-   score--;
-   reasons.push("MACD histogram negative");
-  }
- }
-
- let signal = "WAIT";
-
- if (score === 3) signal = "STRONG BUY";
- else if (score === 2) signal = "BUY";
- else if (score === -3) signal = "STRONG SELL";
- else if (score === -2) signal = "SELL";
-
- const alignment = Math.round(Math.abs(score) / 3 * 100);
- const stopDistance = (volatility > 0 ? volatility : price * 0.005) * 1.5;
-
- let stopLoss = null;
- let target1 = null;
- let target2 = null;
- let target3 = null;
- let riskReward = "—";
-
- if (signal.includes("BUY")) {
-  stopLoss = price - stopDistance;
-  target1 = price + stopDistance;
-  target2 = price + stopDistance * 2;
-  target3 = price + stopDistance * 3;
-  riskReward = "1:1 / 1:2 / 1:3";
- } else if (signal.includes("SELL")) {
-  stopLoss = price + stopDistance;
-  target1 = price - stopDistance;
-  target2 = price - stopDistance * 2;
-  target3 = price - stopDistance * 3;
-  riskReward = "1:1 / 1:2 / 1:3";
- }
-
- $("price").textContent = fmt(price);
- $("signal").textContent = signal;
-
- $("signal").className =
-  "signal " +
-  (signal.includes("BUY") ? "buy" :
-   signal.includes("SELL") ? "sell" : "wait") +
-  (signal.startsWith("STRONG") ? " blink" : "");
-
- $("reason").textContent =
-  reasons.join(" · ") +
-  " · Score " + score + "/3. Signals are not guarantees.";
-
- $("confidence").textContent = alignment + "%";
- $("bar").style.width = alignment + "%";
-
- $("ema20").textContent = fmt(ema20);
- $("ema50").textContent = fmt(ema50);
- $("rsi").textContent = rsi === null ? "—" : rsi.toFixed(1);
- $("macd").textContent = fmt(macd);
-
- $("entry").textContent = fmt(price);
- $("sl").textContent = fmt(stopLoss);
- $("tp1").textContent = fmt(target1);
- $("tp2").textContent = fmt(target2);
- $("tp3").textContent = fmt(target3);
- $("rr").textContent = riskReward;
-
- $("signalTime").textContent =
-  "Calculated " + new Date().toLocaleString() +
-  " · ATR(14): " + fmt(volatility);
-
- const key = $("symbol").value + "|" + $("tf").value + "|" + signal;
-
- if (signal !== "WAIT" && key !== lastSignal) {
-  addLog(signal, price);
-  if (soundOn) playSound();
- }
-
- lastSignal = key;
+  setText("signalTime", "Calculated at " + new Date().toLocaleString());
+  setText("chartInfo", data.length + " candles · " + $("timeframe").value);
+  drawChart(data);
+  recordHistory(symbol, result);
 }
 
-function playSound() {
- try {
-  audioCtx = audioCtx ||
-   new (window.AudioContext || window.webkitAudioContext)();
+async function loadSelectedMarket() {
+  const thisRequest = ++requestSequence;
+  const symbol = selectedMarket;
+  const timeframe = $("timeframe").value;
 
-  if (audioCtx.state === "suspended") {
-   audioCtx.resume();
-  }
-
-  const oscillator = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-
-  oscillator.connect(gain);
-  gain.connect(audioCtx.destination);
-
-  oscillator.frequency.value = 880;
-  gain.gain.value = 0.08;
-
-  oscillator.start();
-  oscillator.stop(audioCtx.currentTime + 0.22);
- } catch (error) {
-  console.warn("Sound is unavailable:", error);
- }
-}
-
-function resetDisplay() {
- $("signal").textContent = "WAITING FOR DATA";
- $("signal").className = "signal wait";
- $("reason").textContent = "Waiting for verified market data.";
- $("price").textContent = "—";
- $("confidence").textContent = "—";
- $("bar").style.width = "0";
-
- [
-  "ema20", "ema50", "rsi", "macd",
-  "entry", "sl", "tp1", "tp2", "tp3", "rr"
- ].forEach(id => {
-  $(id).textContent = "—";
- });
-
- $("signalTime").textContent = "No signal calculated yet.";
- drawChart([]);
-}
-
-async function load() {
- if (loading) return;
-
- loading = true;
-
- const symbol = $("symbol").value;
- const interval = $("tf").value;
-
- $("refresh").disabled = true;
- $("status").textContent = "Requesting real market data…";
- $("status").style.color = "#ffd166";
- $("updated").textContent = "Contacting server…";
- $("market").textContent = symbol;
-
- try {
-  const url = "/api/candles?symbol=" +
-   encodeURIComponent(symbol) +
-   "&interval=" + encodeURIComponent(interval) +
-   "&limit=200";
-
-  const response = await fetch(url, {cache: "no-store"});
-
-  let data;
+  $("details").classList.remove("hidden");
+  setText("selectedPair", symbol.replace("/", ""));
+  setText("detailStatus", "Fetching live market data…");
+  setConnection("Loading data…", false);
 
   try {
-   data = await response.json();
+    const data = await getCandles(symbol, timeframe);
+    if (thisRequest !== requestSequence) return;
+
+    const result = calculateAnalysis(data);
+    marketResults[symbol] = result;
+
+    showAnalysis(symbol, data, result);
+    renderMarkets();
+    setConnection("LIVE DATA RECEIVED", true);
+    setText("lastUpdated", "Updated " + new Date().toLocaleTimeString());
+
+    if (result.signal.startsWith("STRONG") &&
+        result.signal !== lastStrongSignal) {
+      lastStrongSignal = result.signal;
+    }
   } catch (error) {
-   throw new Error(
-    "Server returned unreadable data. HTTP " + response.status
-   );
+    if (thisRequest !== requestSequence) return;
+    setConnection("DATA ERROR", false);
+    setText("detailStatus", error.message || "Unable to load market data.");
+    setText("lastUpdated", error.message || "Unable to load market data.");
+    setText("signal", "WAIT");
+    $("signal").className = "signal neutral";
+    setText("reason", "A signal cannot be calculated until valid data arrives.");
   }
-
-  if (!response.ok) {
-   throw new Error(
-    (data && data.error) ||
-    "Request failed. HTTP " + response.status
-   );
-  }
-
-  // Accept either an array of candles or { candles: [...] }.
-  const candleData = Array.isArray(data)
-   ? data
-   : data && data.candles;
-
-  if (!Array.isArray(candleData)) {
-   throw new Error("Server response has no candles array");
-  }
-
-  candles = candleData.map(item => ({
-   datetime: item.datetime || item.time || "",
-   open: Number(item.open),
-   high: Number(item.high),
-   low: Number(item.low),
-   close: Number(item.close),
-   volume: Number(item.volume || 0)
-  })).filter(item =>
-   [item.open, item.high, item.low, item.close]
-    .every(Number.isFinite) &&
-   item.open > 0 &&
-   item.high > 0 &&
-   item.low > 0 &&
-   item.close > 0 &&
-   item.high >= item.low
-  );
-
-  if (candles.length < 55) {
-   throw new Error(
-    "Only " + candles.length +
-    " valid candles received. At least 55 are needed."
-   );
-  }
-
-  $("status").textContent = "LIVE DATA RECEIVED";
-  $("status").style.color = "var(--green)";
-
-  const fetchedAt = !Array.isArray(data) && data.fetchedAt
-   ? data.fetchedAt
-   : Date.now();
-
-  $("updated").textContent =
-   "Received " + candles.length + " candles · " +
-   new Date(fetchedAt).toLocaleString();
-
-  $("source").textContent =
-   "Source: " +
-   (!Array.isArray(data) && data.source
-    ? data.source
-    : "Configured market data provider");
-
-  drawChart(candles);
-  makeSignal(candles);
-  backtest(candles);
-
- } catch (error) {
-  console.error("GENERAL PRO data load error:", error);
-
-  $("status").textContent = "LIVE DATA UNAVAILABLE";
-  $("status").style.color = "var(--red)";
-  $("updated").textContent =
-   "Error: " + (error.message || String(error));
-
-  $("source").textContent = "Source: —";
-
-  resetDisplay();
-
-  $("status").textContent = "LIVE DATA UNAVAILABLE";
-  $("status").style.color = "var(--red)";
-  $("updated").textContent =
-   "Error: " + (error.message || String(error));
-
- } finally {
-  loading = false;
-  $("refresh").disabled = false;
- }
 }
 
-$("refresh").addEventListener("click", load);
+async function scanCategory() {
+  const markets = MARKETS[selectedCategory] || [];
+  setConnection("Scanning markets…", false);
+  setText("marketCount", "Scanning " + markets.length + " pairs…");
+  renderMarkets();
 
-$("symbol").addEventListener("change", () => {
- lastSignal = "";
- load();
-});
+  // Request markets sequentially to reduce API pressure.
+  for (const market of markets) {
+    try {
+      const data = await getCandles(market.name, $("timeframe").value);
+      const result = calculateAnalysis(data);
+      marketResults[market.name] = result;
 
-$("tf").addEventListener("change", () => {
- lastSignal = "";
- load();
-});
+      if (market.name === selectedMarket) {
+        showAnalysis(market.name, data, result);
+      }
 
-$("sound").addEventListener("click", () => {
- soundOn = !soundOn;
-
- $("sound").textContent =
-  soundOn ? "🔔 Sound on" : "🔕 Sound off";
-
- if (soundOn) playSound();
-});
-
-$("copy").addEventListener("click", async () => {
- const text =
-  "GENERAL PRO V1.0\n" +
-  "Market: " + $("symbol").value + "\n" +
-  "Timeframe: " + $("tf").value + "\n" +
-  "Signal: " + $("signal").textContent + "\n" +
-  "Entry: " + $("entry").textContent + "\n" +
-  "Stop loss: " + $("sl").textContent + "\n" +
-  "TP1: " + $("tp1").textContent + "\n" +
-  "TP2: " + $("tp2").textContent + "\n" +
-  "TP3: " + $("tp3").textContent + "\n" +
-  "Reason: " + $("reason").textContent + "\n" +
-  "Signals are not guaranteed.";
-
- try {
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-   await navigator.clipboard.writeText(text);
-  } else {
-   const textarea = document.createElement("textarea");
-   textarea.value = text;
-   textarea.style.position = "fixed";
-   textarea.style.opacity = "0";
-   document.body.appendChild(textarea);
-   textarea.select();
-
-   const successful = document.execCommand("copy");
-   textarea.remove();
-
-   if (!successful) throw new Error("Copy unavailable");
+      renderMarkets();
+    } catch (error) {
+      marketResults[market.name] = null;
+      renderMarkets();
+    }
   }
 
-  $("copy").textContent = "Copied!";
-  setTimeout(() => {
-   $("copy").textContent = "Copy signal";
-  }, 1500);
+  const available = markets.filter(m => marketResults[m.name]).length;
+  setText("marketCount", available + " / " + markets.length + " markets ready");
 
- } catch (error) {
-  $("copy").textContent = "Copy unavailable";
-  setTimeout(() => {
-   $("copy").textContent = "Copy signal";
-  }, 2000);
- }
+  if (available > 0) {
+    setConnection("LIVE DATA RECEIVED", true);
+    setText("lastUpdated", "Last scan " + new Date().toLocaleTimeString());
+  } else {
+    setConnection("DATA UNAVAILABLE", false);
+    setText("lastUpdated",
+      "No pairs returned valid data. Check API limits and supported symbols.");
+  }
+}
+
+$("category").addEventListener("change", async event => {
+  selectedCategory = event.target.value;
+  selectedMarket = MARKETS[selectedCategory][0].name;
+  $("details").classList.remove("hidden");
+  renderMarkets();
+  await scanCategory();
 });
 
-// Initial load and automatic refresh every 60 seconds.
-load();
-setInterval(load, 60000);
+$("timeframe").addEventListener("change", async () => {
+  await scanCategory();
+});
 
-</script></body>
- </html>
+$("refresh").addEventListener("click", async () => {
+  await scanCategory();
+});
+
+$("copySignal").addEventListener("click", async () => {
+  if (!analysis) {
+    alert("No market analysis is available yet.");
+    return;
+  }
+
+  const text = [
+    "GENERAL PRO V1.0",
+    "Market: " + selectedMarket,
+    "Signal: " + analysis.signal,
+    "Current price: " + fmt(analysis.price),
+    "BUY score: " + analysis.buy + "%",
+    "SELL score: " + analysis.sell + "%",
+    "Neutral score: " + analysis.neutral + "%",
+    "Entry: " + fmt(analysis.entry),
+    "Stop Loss: " + fmt(analysis.sl),
+    "TP1: " + fmt(analysis.tp1),
+    "TP2: " + fmt(analysis.tp2),
+    "TP3: " + fmt(analysis.tp3),
+    "Note: Technical analysis only; no guaranteed results."
+  ].join("\n");
+
+  try {
+    await navigator.clipboard.writeText(text);
+    alert("Market analysis copied.");
+  } catch {
+    prompt("Copy your market analysis:", text);
+  }
+});
+
+// Initial load.
+renderMarkets();
+scanCategory();
+
+// Refresh the visible market list periodically.
+// A complete category scan is spaced to reduce API requests.
+setInterval(() => {
+  scanCategory();
+}, 180000);
+</script>
+
+</body>
+</html>
