@@ -189,3 +189,282 @@ function backtest(data){
  $("trades").textContent=trades.length;
  $("winrate").textContent=trades.length?(100*trades.filter(x=>x>0).length/trades.length).toFixed(1)+"%":"—";
  $("net").textContent=trades.length?((equity-1)*100).toFixed(2)+"%":"—";
+$('dd').textContent = trades.length
+  ? (maxDD * 100).toFixed(2) + '%'
+  : '—';
+
+$('btNote').textContent =
+  'Based on ' + data.length +
+  ' fetched candles. Fees/slippage excluded.';
+}
+
+function makeSignal(data) {
+  const c = data.map(x => x.close);
+  const price = c[c.length - 1];
+  const e20s = ema(c, 20);
+  const e50s = ema(c, 50);
+  const e20 = e20s ? e20s[e20s.length - 1] : null;
+  const e50 = e50s ? e50s[e50s.length - 1] : null;
+  const rsi = calcRSI(c);
+  const macd = calcMACD(c);
+  const vol = atr(data);
+
+  let score = 0;
+  const why = [];
+
+  if (e20 != null && e50 != null) {
+    if (e20 > e50) {
+      score++;
+      why.push('EMA20 above EMA50');
+    } else if (e20 < e50) {
+      score--;
+      why.push('EMA20 below EMA50');
+    }
+  }
+
+  if (rsi != null) {
+    if (rsi >= 52 && rsi < 70) {
+      score++;
+      why.push('RSI bullish');
+    } else if (rsi <= 48 && rsi > 30) {
+      score--;
+      why.push('RSI bearish');
+    } else {
+      why.push('RSI neutral/extended');
+    }
+  }
+
+  if (macd != null) {
+    if (macd > 0) {
+      score++;
+      why.push('MACD positive');
+    } else if (macd < 0) {
+      score--;
+      why.push('MACD negative');
+    }
+  }
+
+  let sig = 'WAIT';
+  if (score === 3) sig = 'STRONG BUY';
+  else if (score === 2) sig = 'BUY';
+  else if (score === -3) sig = 'STRONG SELL';
+  else if (score === -2) sig = 'SELL';
+
+  const confidence = Math.round(Math.abs(score) / 3 * 100);
+  const stopDist = (vol || price * .005) * 1.5;
+
+  let sl = null, tp1 = null, tp2 = null, tp3 = null;
+  let rr = '—';
+
+  if (sig.includes('BUY')) {
+    sl = price - stopDist;
+    tp1 = price + stopDist;
+    tp2 = price + stopDist * 2;
+    tp3 = price + stopDist * 3;
+    rr = '1:1 / 1:2 / 1:3';
+  } else if (sig.includes('SELL')) {
+    sl = price + stopDist;
+    tp1 = price - stopDist;
+    tp2 = price - stopDist * 2;
+    tp3 = price - stopDist * 3;
+    rr = '1:1 / 1:2 / 1:3';
+  }
+
+  $('price').textContent = fmt(price);
+  $('signal').textContent = sig;
+  $('signal').className =
+    'signal ' +
+    (sig.includes('BUY') ? 'buy' :
+     sig.includes('SELL') ? 'sell' : 'wait') +
+    (sig.startsWith('STRONG') ? ' blink' : '');
+
+  $('reason').textContent =
+    why.join(' · ') + '; score ' + score +
+    '/3. Signals are not guarantees.';
+
+  $('confidence').textContent = confidence + '%';
+  $('bar').style.width = confidence + '%';
+  $('ema20').textContent = fmt(e20);
+  $('ema50').textContent = fmt(e50);
+  $('rsi').textContent = rsi == null ? '—' : rsi.toFixed(1);
+  $('macd').textContent = fmt(macd);
+
+  $('entry').textContent = fmt(price);
+  $('sl').textContent = fmt(sl);
+  $('tp1').textContent = fmt(tp1);
+  $('tp2').textContent = fmt(tp2);
+  $('tp3').textContent = fmt(tp3);
+  $('rr').textContent = rr;
+
+  $('signalTime').textContent =
+    'Calculated ' + new Date().toLocaleString() +
+    ' · ATR(14): ' + fmt(vol);
+
+  if (sig !== lastSignal &&
+      (sig.includes('BUY') || sig.includes('SELL'))) {
+    logItems.unshift({
+      time: new Date().toLocaleTimeString(),
+      market: $('symbol').value,
+      signal: sig,
+      price
+    });
+
+    logItems = logItems.slice(0, 15);
+
+    $('log').innerHTML = logItems.map(x =>
+      `<tr><td>${x.time}</td><td>${x.market}</td>
+      <td class="${x.signal.includes('BUY') ? 'buy' : 'sell'}">${x.signal}</td>
+      <td>${fmt(x.price)}</td></tr>`
+    ).join('');
+
+    if (soundOn) playSound();
+  }
+
+  lastSignal = sig;
+}
+
+function playSound() {
+  try {
+    audioCtx = audioCtx ||
+      new (window.AudioContext || window.webkitAudioContext)();
+
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+
+    o.connect(g);
+    g.connect(audioCtx.destination);
+    o.frequency.value = 880;
+    g.gain.value = .08;
+    o.start();
+    o.stop(audioCtx.currentTime + .22);
+  } catch (e) {}
+}
+
+async function load() {
+  const symbol = $('symbol').value;
+  const interval = $('tf').value;
+
+  $('refresh').disabled = true;
+  $('status').textContent = 'Requesting real market data…';
+  $('updated').textContent = 'Contacting server…';
+  $('market').textContent = symbol;
+
+  try {
+    const url = '/api/candles?symbol=' +
+      encodeURIComponent(symbol) +
+      '&interval=' + encodeURIComponent(interval) +
+      '&limit=200';
+
+    const response = await fetch(url, {cache: 'no-store'});
+    let data;
+
+    try {
+      data = await response.json();
+    } catch (e) {
+      throw new Error('Server returned unreadable data (HTTP ' +
+        response.status + ')');
+    }
+
+    if (!response.ok) {
+      throw new Error(data.error ||
+        'Request failed: HTTP ' + response.status);
+    }
+
+    if (!Array.isArray(data.candles)) {
+      throw new Error('Server response has no candles array');
+    }
+
+    candles = data.candles.map(x => ({
+      datetime: x.datetime,
+      open: Number(x.open),
+      high: Number(x.high),
+      low: Number(x.low),
+      close: Number(x.close),
+      volume: Number(x.volume || 0)
+    })).filter(x =>
+      [x.open, x.high, x.low, x.close].every(Number.isFinite)
+    );
+
+    if (candles.length < 55) {
+      throw new Error('Only ' + candles.length +
+        ' valid candles received; at least 55 are needed');
+    }
+
+    $('status').textContent = 'LIVE DATA RECEIVED';
+    $('status').style.color = 'var(--green)';
+    $('updated').textContent =
+      'Received ' + candles.length + ' candles · ' +
+      new Date(data.fetchedAt || Date.now()).toLocaleString();
+    $('source').textContent =
+      'Source: ' + (data.source || 'Market data provider');
+
+    drawChart(candles);
+    makeSignal(candles);
+    backtest(candles);
+
+  } catch (e) {
+    console.error('GENERAL PRO data load error:', e);
+    $('status').textContent = 'LIVE DATA UNAVAILABLE';
+    $('status').style.color = 'var(--red)';
+    $('updated').textContent = 'Error: ' + (e.message || String(e));
+    $('source').textContent = 'Source: —';
+    $('signal').textContent = 'WAIT';
+    $('signal').className = 'signal wait';
+    $('reason').textContent =
+      'Could not calculate a signal. Check the error above and refresh.';
+    $('price').textContent = '—';
+
+    [
+      'confidence', 'ema20', 'ema50', 'rsi', 'macd',
+      'entry', 'sl', 'tp1', 'tp2', 'tp3', 'rr'
+    ].forEach(id => $(id).textContent = '—');
+
+    $('bar').style.width = '0';
+    drawChart([]);
+
+  } finally {
+    $('refresh').disabled = false;
+  }
+}
+
+$('refresh').addEventListener('click', load);
+$('symbol').addEventListener('change', () => {
+  lastSignal = '';
+  load();
+});
+$('tf').addEventListener('change', () => {
+  lastSignal = '';
+  load();
+});
+$('sound').addEventListener('click', () => {
+  soundOn = !soundOn;
+  $('sound').textContent = soundOn ? '🔔 Sound on' : '🔕 Sound off';
+  if (soundOn) playSound();
+});
+
+$('copy').addEventListener('click', async () => {
+  const text = `GENERAL PRO V1.0
+Market: ${$('symbol').value}
+Signal: ${$('signal').textContent}
+Entry: ${$('entry').textContent}
+SL: ${$('sl').textContent}
+TP1: ${$('tp1').textContent}
+TP2: ${$('tp2').textContent}
+TP3: ${$('tp3').textContent}
+Reason: ${$('reason').textContent}`;
+
+  try {
+    await navigator.clipboard.writeText(text);
+    $('copy').textContent = 'Copied!';
+    setTimeout(() => $('copy').textContent = 'Copy signal', 1500);
+  } catch (e) {
+    $('reason').textContent =
+      'Copy not supported by this browser. ' + $('reason').textContent;
+  }
+});
+
+load();
+setInterval(load, 60000);
+</script>
+</body>
+</html>
