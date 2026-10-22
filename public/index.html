@@ -1,1072 +1,294 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#0b0f18">
-<meta name="application-name" content="GENERAL PRO V1.0">
-<meta name="mobile-web-app-capable" content="yes">
-<link rel="icon" type="image/png" href="/icon.png">
-<link rel="apple-touch-icon" href="/icon.png">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b0f18"><meta name="application-name" content="GENERAL PRO V1.0">
+<link rel="icon" type="image/png" href="/icon.png"><link rel="apple-touch-icon" href="/icon.png">
 <title>GENERAL PRO V1.0</title>
-
 <style>
-:root {
-  --bg:#0b0f18;
-  --panel:#141b29;
-  --panel2:#101725;
-  --border:#263247;
-  --text:#edf3ff;
-  --muted:#91a0b8;
-  --green:#00e6a0;
-  --red:#ff496c;
-  --yellow:#ffd166;
-  --blue:#58a6ff;
-}
-* { box-sizing:border-box; }
-body {
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Arial,sans-serif;
-}
-header {
-  background:#101725;
-  border-bottom:1px solid var(--border);
-  padding:16px;
-  position:sticky;
-  top:0;
-  z-index:10;
-}
-.headerrow {
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-.logo {
-  width:43px;
-  height:43px;
-  object-fit:contain;
-  border-radius:12px;
-  background:#202a3a;
-}
-.brand {
-  font-size:20px;
-  font-weight:900;
-  letter-spacing:.5px;
-}
-.brand span { color:var(--green); }
-.subtitle {
-  color:var(--muted);
-  font-size:10px;
-  margin-top:5px;
-}
-main {
-  max-width:1050px;
-  margin:auto;
-  padding:13px;
-}
-select,button,input {
-  border:1px solid var(--border);
-  border-radius:10px;
-  background:var(--panel2);
-  color:var(--text);
-  padding:12px;
-  font-size:14px;
-}
-button { cursor:pointer; }
-button:active { transform:scale(.98); }
-.primary {
-  background:var(--green);
-  color:#07140f;
-  font-weight:bold;
-  border:0;
-}
-.toolbar {
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  margin:12px 0;
-}
-.toolbar select { flex:1; min-width:130px; }
-.card {
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:14px;
-  padding:14px;
-  margin-bottom:12px;
-}
-.label {
-  color:var(--muted);
-  font-size:10px;
-  text-transform:uppercase;
-  letter-spacing:1px;
-}
-.small { color:var(--muted); font-size:12px; }
-.big {
-  font-size:25px;
-  font-weight:900;
-  margin-top:7px;
-  overflow-wrap:anywhere;
-}
-.status {
-  display:inline-block;
-  background:#202a3a;
-  color:var(--yellow);
-  padding:7px 9px;
-  border-radius:8px;
-  font-size:11px;
-}
-.sectiontitle {
-  font-size:16px;
-  font-weight:800;
-  margin-bottom:12px;
-}
-.marketlist {
-  display:grid;
-  gap:9px;
-}
-.marketrow {
-  display:block;
-  width:100%;
-  text-align:left;
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-left:4px solid var(--blue);
-  border-radius:12px;
-  padding:13px;
-  color:var(--text);
-}
-.marketrow.active { border-color:var(--green); }
-.markettop {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:8px;
-}
-.pair { font-size:16px; font-weight:900; }
-.price { font-size:15px; font-weight:bold; }
-.marketbottom {
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:7px;
-  margin-top:13px;
-}
-.score {
-  padding:8px 5px;
-  background:#0d1420;
-  border-radius:8px;
-  text-align:center;
-  font-size:12px;
-  font-weight:bold;
-}
-.score span {
-  display:block;
-  font-size:10px;
-  color:var(--muted);
-  margin-bottom:5px;
-}
-.buy { color:var(--green); }
-.sell { color:var(--red); }
-.neutral { color:var(--yellow); }
-.strongbuy { color:var(--green); }
-.strongsell { color:var(--red); }
-.weak { color:var(--yellow); }
-@keyframes blink {
-  50% { opacity:.3; }
-}
-.blink { animation:blink .8s infinite; }
-.signal {
-  font-size:25px;
-  font-weight:900;
-  margin:10px 0;
-}
-.grid {
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:9px;
-}
-.metric {
-  background:#0d1420;
-  border-radius:10px;
-  padding:12px;
-  min-width:0;
-}
-.metric .number {
-  font-size:18px;
-  font-weight:bold;
-  margin-top:7px;
-  overflow-wrap:anywhere;
-}
-.levels {
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
-  gap:8px;
-  margin-top:12px;
-}
-.level {
-  padding:12px;
-  background:#0d1420;
-  border-radius:9px;
-}
-.level b {
-  display:block;
-  margin-top:7px;
-  font-size:16px;
-  overflow-wrap:anywhere;
-}
-canvas {
-  display:block;
-  width:100%;
-  height:190px;
-}
-.hidden { display:none !important; }
-table {
-  width:100%;
-  border-collapse:collapse;
-  font-size:12px;
-}
-th,td {
-  padding:10px 5px;
-  border-bottom:1px solid var(--border);
-  text-align:left;
-}
-.tablewrap { overflow-x:auto; }
-footer {
-  text-align:center;
-  color:var(--muted);
-  font-size:11px;
-  padding:18px;
-}
-@media(min-width:700px) {
-  .marketlist { grid-template-columns:repeat(2,minmax(0,1fr)); }
-  .detailgrid {
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:12px;
-  }
-}
-@media(max-width:380px) {
-  .brand { font-size:17px; }
-  .big { font-size:21px; }
-  .marketbottom { gap:4px; }
-  .score { font-size:11px; }
-}
-</style>
-</head>
-
-<body>
-
-<header>
-  <div class="headerrow">
-    <img class="logo" src="/icon.png" alt="GENERAL PRO icon"
-         onerror="this.style.display='none'">
-    <div>
-      <div class="brand">GENERAL <span>PRO</span> V1.0</div>
-      <div class="subtitle">LIVE MARKET INTELLIGENCE · SIGNALS ONLY</div>
-    </div>
-  </div>
-</header>
-
+:root{--bg:#0b0f18;--panel:#141b29;--panel2:#101725;--border:#263247;--text:#edf3ff;--muted:#91a0b8;--green:#00e6a0;--red:#ff496c;--yellow:#ffd166;--blue:#58a6ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+header{background:#101725;border-bottom:1px solid var(--border);padding:16px;position:sticky;top:0;z-index:10}.headerrow{display:flex;align-items:center;gap:12px}
+.logo{width:43px;height:43px;object-fit:contain;border-radius:12px;background:#202a3a}.brand{font-size:20px;font-weight:900;letter-spacing:.5px}.brand span{color:var(--green)}.subtitle{color:var(--muted);font-size:10px;margin-top:5px}
+main{max-width:1050px;margin:auto;padding:13px}select,button{border:1px solid var(--border);border-radius:10px;background:var(--panel2);color:var(--text);padding:12px;font-size:14px}button{cursor:pointer}button:active{transform:scale(.98)}.primary{background:var(--green);color:#07140f;font-weight:bold;border:0}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.toolbar select{flex:1;min-width:130px}.card{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:12px}
+.label{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:1px}.small{color:var(--muted);font-size:12px}.big{font-size:25px;font-weight:900;margin-top:7px;overflow-wrap:anywhere}.status{display:inline-block;background:#202a3a;color:var(--yellow);padding:7px 9px;border-radius:8px;font-size:11px}
+.sectiontitle{font-size:16px;font-weight:800;margin-bottom:12px}.marketlist{display:grid;gap:9px}.marketrow{display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--border);border-left:4px solid var(--blue);border-radius:12px;padding:13px;color:var(--text)}.marketrow.active{border-color:var(--green)}
+.markettop{display:flex;justify-content:space-between;align-items:center;gap:8px}.pair{font-size:16px;font-weight:900}.price{font-size:15px;font-weight:bold}.marketbottom{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin-top:13px}
+.score{padding:8px 5px;background:#0d1420;border-radius:8px;text-align:center;font-size:12px;font-weight:bold;min-width:0}.score span{display:block;font-size:10px;color:var(--muted);margin-bottom:5px}
+.buy{color:var(--green)}.sell{color:var(--red)}.neutral{color:var(--yellow)}.strongbuy{color:var(--green)}.strongsell{color:var(--red)}@keyframes blink{50%{opacity:.3}}.blink{animation:blink .8s infinite}
+.signal{font-size:25px;font-weight:900;margin:10px 0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.metric{background:#0d1420;border-radius:10px;padding:12px;min-width:0}.metric .number{font-size:18px;font-weight:bold;margin-top:7px;overflow-wrap:anywhere}
+.levels{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}.level{padding:12px;background:#0d1420;border-radius:9px}.level b{display:block;margin-top:7px;font-size:16px;overflow-wrap:anywhere}
+canvas{display:block;width:100%;height:190px}.hidden{display:none!important}.back-btn{width:100%;margin:0 0 12px;background:#202a3a;font-weight:bold;text-align:left}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{padding:10px 5px;border-bottom:1px solid var(--border);text-align:left}.tablewrap{overflow-x:auto}footer{text-align:center;color:var(--muted);font-size:11px;padding:18px}
+@media(min-width:700px){.marketlist{grid-template-columns:repeat(2,minmax(0,1fr))}.detailgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}}@media(max-width:380px){.brand{font-size:17px}.big{font-size:21px}.marketbottom{gap:4px}.score{font-size:11px}}
+</style></head><body>
+<header><div class="headerrow"><img class="logo" src="/icon.png" alt="GENERAL PRO icon" onerror="this.style.display='none'"><div><div class="brand">GENERAL <span>PRO</span> V1.0</div><div class="subtitle">LIVE MARKET INTELLIGENCE · SIGNALS ONLY</div></div></div></header>
 <main>
-
-  <div class="toolbar">
-    <select id="category" aria-label="Market category">
-      <option value="FOREX">FOREX</option>
-      <option value="CRYPTO">CRYPTO</option>
-      <option value="OTHER">OTHER</option>
-    </select>
-
-    <select id="timeframe" aria-label="Chart timeframe">
-      <option value="15min">15 Minutes</option>
-      <option value="1h" selected>1 Hour</option>
-      <option value="4h">4 Hours</option>
-      <option value="1day">1 Day</option>
-    </select>
-
-    <button class="primary" id="refresh">↻ Refresh</button>
-  </div>
-
-  <section class="card">
-    <div class="markettop">
-      <div>
-        <div class="label">Market scanner</div>
-        <div class="big" id="marketCount">Loading markets…</div>
-      </div>
-      <span class="status" id="connection">Connecting…</span>
-    </div>
-    <p class="small" id="lastUpdated">
-      Waiting for market data.
-    </p>
-  </section>
-
-  <section class="card">
-    <div class="sectiontitle" id="listTitle">CRYPTO MARKETS</div>
-    <p class="small">
-      Tap any market to open its complete analysis.
-      Scores are based on technical indicator alignment.
-    </p>
-    <div id="marketList" class="marketlist">
-      <div class="small">Loading market pairs…</div>
-    </div>
-  </section>
-
-  <section id="details" class="hidden">
-        <button id="backToDashboard" type="button" class="back-btn">
-      ← BACK TO DASHBOARD
-    </button>
-    <div class="card">
-      <div class="markettop">
-        <div>
-          <div class="label">Selected market</div>
-          <div class="big" id="selectedPair">—</div>
-        </div>
-        <div style="text-align:right">
-          <div class="label">Current price</div>
-          <div class="big" id="currentPrice">—</div>
-        </div>
-      </div>
-      <p class="small" id="detailStatus">Select a market.</p>
-    </div>
-
-    <div class="detailgrid">
-      <div class="card">
-        <div class="label">Technical signal</div>
-        <div class="signal neutral" id="signal">WAIT</div>
-        <p class="small" id="reason">Waiting for indicators.</p>
-
-        <div class="grid">
-          <div class="metric">
-            <div class="label">BUY score</div>
-            <div class="number buy" id="buyScore">—</div>
-          </div>
-          <div class="metric">
-            <div class="label">SELL score</div>
-            <div class="number sell" id="sellScore">—</div>
-          </div>
-          <div class="metric">
-            <div class="label">Neutral score</div>
-            <div class="number neutral" id="neutralScore">—</div>
-          </div>
-          <div class="metric">
-            <div class="label">Indicator alignment</div>
-            <div class="number" id="alignment">—</div>
-          </div>
-        </div>
-        <p class="small">
-          Scores are analytical estimates, not a probability of profit.
-        </p>
-      </div>
-
-      <div class="card">
-        <div class="sectiontitle">Entry, SL & Take Profit</div>
-        <div class="levels">
-          <div class="level">
-            <div class="label">Entry price</div>
-            <b id="entry">—</b>
-          </div>
-          <div class="level">
-            <div class="label">Stop loss</div>
-            <b id="sl">—</b>
-          </div>
-          <div class="level">
-            <div class="label">Take profit 1</div>
-            <b id="tp1">—</b>
-          </div>
-          <div class="level">
-            <div class="label">Take profit 2</div>
-            <b id="tp2">—</b>
-          </div>
-          <div class="level">
-            <div class="label">Take profit 3</div>
-            <b id="tp3">—</b>
-          </div>
-          <div class="level">
-            <div class="label">Risk / reward</div>
-            <b id="rr">—</b>
-          </div>
-        </div>
-        <button id="copySignal" style="width:100%;margin-top:12px">
-          Copy market analysis
-        </button>
-        <p class="small" id="signalTime">—</p>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="sectiontitle">Price chart</div>
-      <canvas id="chart" width="900" height="220"></canvas>
-      <div class="small" id="chartInfo">Waiting for candles.</div>
-    </div>
-
-    <div class="card">
-      <div class="sectiontitle">Technical indicators</div>
-      <div class="grid">
-        <div class="metric">
-          <div class="label">EMA 20</div>
-          <div class="number" id="ema20">—</div>
-        </div>
-        <div class="metric">
-          <div class="label">EMA 50</div>
-          <div class="number" id="ema50">—</div>
-        </div>
-        <div class="metric">
-          <div class="label">RSI 14</div>
-          <div class="number" id="rsi">—</div>
-        </div>
-        <div class="metric">
-          <div class="label">MACD</div>
-          <div class="number" id="macd">—</div>
-        </div>
-        <div class="metric">
-          <div class="label">ATR 14</div>
-          <div class="number" id="atr">—</div>
-        </div>
-        <div class="metric">
-          <div class="label">Candles received</div>
-          <div class="number" id="candleCount">—</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="card">
-    <div class="sectiontitle">Recent signal history</div>
-    <div class="tablewrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Time</th>
-            <th>Pair</th>
-            <th>Signal</th>
-            <th>Price</th>
-          </tr>
-        </thead>
-        <tbody id="history">
-          <tr><td colspan="4">No signals recorded yet.</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <p class="small">
-    Market data depends on provider availability, supported symbols and API
-    limits. If data is unavailable, this dashboard will show an error instead
-    of inventing prices. Signals are technical analysis only, not financial
-    advice or a guarantee of results.
-  </p>
-
-</main>
-
-<footer>GENERAL PRO V1.0 · Market analysis only · No trade execution</footer>
-
+<div id="dashboardView">
+<div class="toolbar"><select id="category" aria-label="Market category"><option value="FOREX">FOREX</option><option value="CRYPTO">CRYPTO</option><option value="OTHER">OTHER</option></select><select id="timeframe" aria-label="Chart timeframe"><option value="15min">15 Minutes</option><option value="1h" selected>1 Hour</option><option value="4h">4 Hours</option><option value="1day">1 Day</option></select><button class="primary" id="refresh" type="button">↻ Refresh</button></div>
+<section class="card"><div class="markettop"><div><div class="label">Market scanner</div><div class="big" id="marketCount">Loading markets…</div></div><span class="status" id="connection">Connecting…</span></div><p class="small" id="lastUpdated">Waiting for market data.</p></section>
+<section class="card"><div class="sectiontitle" id="listTitle">FOREX MARKETS</div><p class="small">Tap any market to open its complete analysis. Scores are based on technical indicator alignment.</p><div id="marketList" class="marketlist"><div class="small">Loading market pairs…</div></div></section>
+<section class="card"><div class="sectiontitle">Recent signal history</div><div class="tablewrap"><table><thead><tr><th>Time</th><th>Pair</th><th>Signal</th><th>Price</th></tr></thead><tbody id="history"><tr><td colspan="4">No signals recorded yet.</td></tr></tbody></table></div></section>
+<p class="small">Market data depends on provider availability, supported symbols and API limits. If data is unavailable, this dashboard shows an error instead of inventing prices. Signals are technical analysis only, not financial advice or a guarantee of results.</p>
+</div>
+<section id="details" class="hidden"><button id="backToDashboard" type="button" class="back-btn">← BACK TO DASHBOARD</button>
+<div class="card"><div class="markettop"><div><div class="label">Selected market</div><div class="big" id="selectedPair">—</div></div><div style="text-align:right"><div class="label">Current price</div><div class="big" id="currentPrice">—</div></div></div><p class="small" id="detailStatus">Select a market.</p></div>
+<div class="detailgrid"><div class="card"><div class="label">Technical signal</div><div class="signal neutral" id="signal">WAIT</div><p class="small" id="reason">Waiting for indicators.</p><div class="grid">
+<div class="metric"><div class="label">BUY score</div><div class="number buy" id="buyScore">—</div></div><div class="metric"><div class="label">SELL score</div><div class="number sell" id="sellScore">—</div></div><div class="metric"><div class="label">Neutral score</div><div class="number neutral" id="neutralScore">—</div></div><div class="metric"><div class="label">Indicator alignment</div><div class="number" id="alignment">—</div></div></div><p class="small">Scores are analytical estimates, not a probability of profit.</p></div>
+<div class="card"><div class="sectiontitle">Entry, SL & Take Profit</div><div class="levels"><div class="level"><div class="label">Entry price</div><b id="entry">—</b></div><div class="level"><div class="label">Stop loss</div><b id="sl">—</b></div><div class="level"><div class="label">Take profit 1</div><b id="tp1">—</b></div><div class="level"><div class="label">Take profit 2</div><b id="tp2">—</b></div><div class="level"><div class="label">Take profit 3</div><b id="tp3">—</b></div><div class="level"><div class="label">Risk / reward</div><b id="rr">—</b></div></div><button id="copySignal" type="button" style="width:100%;margin-top:12px">Copy market analysis</button><p class="small" id="signalTime">—</p></div></div>
+<div class="card"><div class="sectiontitle">Price chart</div><canvas id="chart" width="900" height="220"></canvas><div class="small" id="chartInfo">Waiting for candles.</div></div>
+<div class="card"><div class="sectiontitle">Technical indicators</div><div class="grid"><div class="metric"><div class="label">EMA 20</div><div class="number" id="ema20">—</div></div><div class="metric"><div class="label">EMA 50</div><div class="number" id="ema50">—</div></div><div class="metric"><div class="label">RSI 14</div><div class="number" id="rsi">—</div></div><div class="metric"><div class="label">MACD</div><div class="number" id="macd">—</div></div><div class="metric"><div class="label">ATR 14</div><div class="number" id="atr">—</div></div><div class="metric"><div class="label">Candles received</div><div class="number" id="candleCount">—</div></div></div></div>
+</section></main><footer>GENERAL PRO V1.0 · Market analysis only · No trade execution</footer>
 <script>
 "use strict";
-
-const $ = id => document.getElementById(id);
-
-const MARKETS = {
-  CRYPTO: [
-    { name:"BTC/USD", label:"BTCUSD" },
-    { name:"ETH/USD", label:"ETHUSD" },
-    { name:"BTC/USDT", label:"BTCUSDT" },
-    { name:"ETH/USDT", label:"ETHUSDT" },
-    { name:"SOL/USD", label:"SOLUSD" },
-    { name:"XRP/USD", label:"XRPUSD" },
-    { name:"BNB/USD", label:"BNBUSD" },
-    { name:"ADA/USD", label:"ADAUSD" },
-    { name:"DOGE/USD", label:"DOGEUSD" },
-    { name:"LTC/USD", label:"LTCUSD" }
-  ],
-  FOREX: [
-    { name:"EUR/USD", label:"EURUSD" },
-    { name:"GBP/USD", label:"GBPUSD" },
-    { name:"USD/JPY", label:"USDJPY" },
-    { name:"USD/CHF", label:"USDCHF" },
-    { name:"AUD/USD", label:"AUDUSD" },
-    { name:"NZD/USD", label:"NZDUSD" },
-    { name:"USD/CAD", label:"USDCAD" },
-    { name:"EUR/GBP", label:"EURGBP" },
-    { name:"EUR/JPY", label:"EURJPY" },
-    { name:"GBP/JPY", label:"GBPJPY" }
-  ],
-  OTHER: [
-    { name:"XAU/USD", label:"GOLD" },
-    { name:"XAG/USD", label:"SILVER" },
-    { name:"WTI/USD", label:"WTI OIL" },
-    { name:"BRENT/USD", label:"BRENT OIL" }
-  ]
+const $=id=>document.getElementById(id);
+const MARKETS={
+CRYPTO:[["BTC/USD","BTCUSD"],["ETH/USD","ETHUSD"],["BTC/USDT","BTCUSDT"],["ETH/USDT","ETHUSDT"],["SOL/USD","SOLUSD"],["XRP/USD","XRPUSD"],["BNB/USD","BNBUSD"],["ADA/USD","ADAUSD"],["DOGE/USD","DOGEUSD"],["LTC/USD","LTCUSD"]].map(([name,label])=>({name,label})),
+FOREX:[["EUR/USD","EURUSD"],["GBP/USD","GBPUSD"],["USD/JPY","USDJPY"],["USD/CHF","USDCHF"],["AUD/USD","AUDUSD"],["NZD/USD","NZDUSD"],["USD/CAD","USDCAD"],["EUR/GBP","EURGBP"],["EUR/JPY","EURJPY"],["GBP/JPY","GBPJPY"]].map(([name,label])=>({name,label})),
+OTHER:[["XAU/USD","GOLD"],["XAG/USD","SILVER"],["WTI/USD","WTI OIL"],["BRENT/USD","BRENT OIL"]].map(([name,label])=>({name,label}))
 };
+let selectedMarket=null,marketData={},signalHistory=[],scanBusy=false,detailBusy=false,lastSignals={};
 
-let selectedCategory = "FOREX";
-let selectedMarket = "EUR/USD";
-let candles = [];
-let analysis = null;
-let marketResults = {};
-let requestSequence = 0;
-let historyItems = [];
-let lastStrongSignal = "";
-
-function fmt(n, symbol) {
-  if (!Number.isFinite(n)) return "—";
-  const digits = Math.abs(n) >= 1000 ? 2 :
-                 Math.abs(n) >= 10 ? 3 : 5;
-  return n.toLocaleString("en-US", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: digits
-  });
+function fmt(value,symbol){
+ if(!Number.isFinite(value))return "—";
+ const digits=symbol&&symbol.includes("JPY")?3:(symbol&&symbol.includes("/")&&!symbol.includes("BTC")&&!symbol.includes("ETH")?5:2);
+ return value.toLocaleString("en-US",{minimumFractionDigits:digits,maximumFractionDigits:digits});
 }
-
-function setText(id, value) {
-  $(id).textContent = value;
+function categoryMarkets(){return MARKETS[$("category").value]||MARKETS.FOREX}
+function apiSymbol(market){return market.name.replace("/","/")}
+function timeframe(){return $("timeframe").value}
+function setConnection(message,good=false){$("connection").textContent=message;$("connection").style.color=good?"var(--green)":"var(--yellow)"}
+function showDashboard(){
+ $("dashboardView").classList.remove("hidden");$("details").classList.add("hidden");
+ window.scrollTo({top:0,behavior:"smooth"});
 }
-
-function setConnection(message, ok) {
-  setText("connection", message);
-  $("connection").style.color = ok ? "var(--green)" : "var(--yellow)";
+function openMarketDetails(market){
+ selectedMarket=market;
+ $("dashboardView").classList.add("hidden");$("details").classList.remove("hidden");
+ $("selectedPair").textContent=market.name;$("currentPrice").textContent="Loading…";
+ $("signal").textContent="ANALYZING…";$("signal").className="signal neutral";
+ $("reason").textContent="Loading market candles and technical indicators.";
+ $("detailStatus").textContent="Requesting market data…";
+ loadSelectedMarket();
+ window.scrollTo({top:0,behavior:"smooth"});
 }
-
-function mean(arr) {
-  return arr.length
-    ? arr.reduce((sum, value) => sum + value, 0) / arr.length
-    : NaN;
+function renderMarkets(){
+ const list=$("marketList");list.innerHTML="";
+ const markets=categoryMarkets();
+ $("listTitle").textContent=$("category").value+" MARKETS";
+ $("marketCount").textContent=markets.length+" markets";
+ markets.forEach(market=>{
+  const data=marketData[market.name]||{};
+  const row=document.createElement("button");
+  row.type="button";row.className="marketrow"+(selectedMarket&&selectedMarket.name===market.name?" active":"");
+  const sig=data.signal||"WAIT";
+  const cls=sig.includes("BUY")?"buy":sig.includes("SELL")?"sell":"neutral";
+  row.innerHTML=`<div class="markettop"><span class="pair">${market.name}</span><span class="price">${data.price?fmt(data.price,market.name):"—"}</span></div>
+  <div class="marketbottom"><div class="score"><span>SIGNAL</span><b class="${cls}">${sig}</b></div><div class="score"><span>RSI</span><b>${Number.isFinite(data.rsi)?data.rsi.toFixed(1):"—"}</b></div><div class="score"><span>STATUS</span><b>${data.error?"ERROR":data.price?"LIVE":"WAIT"}</b></div></div>`;
+  row.addEventListener("click",()=>openMarketDetails(market));
+  list.appendChild(row);
+ });
 }
-
-function ema(values, period) {
-  if (values.length < period) return [];
-  const result = [];
-  const k = 2 / (period + 1);
-  let current = mean(values.slice(0, period));
-
-  for (let i = 0; i < values.length; i++) {
-    if (i < period - 1) {
-      result.push(null);
-    } else if (i === period - 1) {
-      result.push(current);
-    } else {
-      current = values[i] * k + current * (1 - k);
-      result.push(current);
-    }
-  }
-  return result;
+async function fetchCandles(market){
+ const url="/api/candles?symbol="+encodeURIComponent(apiSymbol(market))+"&interval="+encodeURIComponent(timeframe())+"&limit=100";
+ const response=await fetch(url,{cache:"no-store"});
+ if(!response.ok)throw new Error("Market API returned HTTP "+response.status);
+ const json=await response.json();
+ if(json.error)throw new Error(json.error);
+ let raw=json.candles||json.data||json.values||json;
+ if(!Array.isArray(raw))throw new Error("No candle data returned");
+ const candles=raw.map(c=>({
+  time:c.datetime||c.time||c.date||"",
+  open:Number(c.open),high:Number(c.high),low:Number(c.low),close:Number(c.close)
+ })).filter(c=>Number.isFinite(c.close)&&Number.isFinite(c.high)&&Number.isFinite(c.low));
+ if(candles.length<20)throw new Error("Not enough candle data for analysis");
+ return candles.reverseIfNeeded?candles.reverseIfNeeded():candles;
 }
-
-function calcRSI(closes, period = 14) {
-  if (closes.length <= period) return NaN;
-
-  let gains = 0;
-  let losses = 0;
-
-  for (let i = closes.length - period; i < closes.length; i++) {
-    const change = closes[i] - closes[i - 1];
-    if (change > 0) gains += change;
-    else losses -= change;
-  }
-
-  if (losses === 0) return gains === 0 ? 50 : 100;
-  const rs = gains / losses;
-  return 100 - 100 / (1 + rs);
+function ema(values,period){
+ if(values.length<period)return NaN;
+ const k=2/(period+1);let current=values.slice(0,period).reduce((a,b)=>a+b,0)/period;
+ for(let i=period;i<values.length;i++)current=values[i]*k+current*(1-k);
+ return current;
 }
-
-function calcMACD(closes) {
-  if (closes.length < 35) return NaN;
-
-  const fast = ema(closes, 12);
-  const slow = ema(closes, 26);
-  const lines = [];
-
-  for (let i = 0; i < closes.length; i++) {
-    lines.push(
-      fast[i] !== null && slow[i] !== null &&
-      Number.isFinite(fast[i]) && Number.isFinite(slow[i])
-        ? fast[i] - slow[i]
-        : null
-    );
-  }
-
-  const valid = lines.filter(Number.isFinite);
-  if (valid.length < 9) return NaN;
-
-  const signal = ema(valid, 9);
-  const macdLine = valid[valid.length - 1];
-  const signalLine = signal[signal.length - 1];
-
-  return macdLine - signalLine;
+function calcRSI(values,period=14){
+ if(values.length<=period)return NaN;
+ let gains=0,losses=0;
+ for(let i=1;i<=period;i++){const change=values[i]-values[i-1];if(change>0)gains+=change;else losses-=change}
+ let avgGain=gains/period,avgLoss=losses/period;
+ for(let i=period+1;i<values.length;i++){
+  const change=values[i]-values[i-1];
+  avgGain=(avgGain*(period-1)+Math.max(0,change))/period;
+  avgLoss=(avgLoss*(period-1)+Math.max(0,-change))/period;
+ }
+ if(avgLoss===0)return 100;
+ return 100-(100/(1+avgGain/avgLoss));
 }
-
-function calcATR(data, period = 14) {
-  if (data.length < period + 1) return NaN;
-  const ranges = [];
-
-  for (let i = 1; i < data.length; i++) {
-    const current = data[i];
-    const previous = data[i - 1];
-    ranges.push(Math.max(
-      current.high - current.low,
-      Math.abs(current.high - previous.close),
-      Math.abs(current.low - previous.close)
-    ));
-  }
-
-  return mean(ranges.slice(-period));
+function calcATR(candles,period=14){
+ if(candles.length<period+1)return NaN;
+ const trs=[];
+ for(let i=1;i<candles.length;i++){
+  const c=candles[i],prev=candles[i-1].close;
+  trs.push(Math.max(c.high-c.low,Math.abs(c.high-prev),Math.abs(c.low-prev)));
+ }
+ return trs.slice(-period).reduce((a,b)=>a+b,0)/Math.min(period,trs.length);
 }
-
-function calculateAnalysis(data) {
-  if (!Array.isArray(data) || data.length < 55) {
-    throw new Error("Not enough candles received. At least 55 are needed.");
-  }
-
-  const closes = data.map(c => Number(c.close));
-  const e20 = ema(closes, 20);
-  const e50 = ema(closes, 50);
-  const price = closes[closes.length - 1];
-  const fast = e20[e20.length - 1];
-  const slow = e50[e50.length - 1];
-  const rsi = calcRSI(closes);
-  const macd = calcMACD(closes);
-  const atr = calcATR(data);
-
-  if (![price, fast, slow, rsi, macd, atr].every(Number.isFinite)) {
-    throw new Error("Indicators could not be calculated from this data.");
-  }
-
-  let buy = 0;
-  let sell = 0;
-
-  if (fast > slow) buy += 30;
-  else if (fast < slow) sell += 30;
-
-  if (price > fast) buy += 20;
-  else if (price < fast) sell += 20;
-
-  if (rsi >= 52 && rsi < 70) buy += 20;
-  else if (rsi <= 48 && rsi > 30) sell += 20;
-
-  if (macd > 0) buy += 30;
-  else if (macd < 0) sell += 30;
-
-  const total = buy + sell;
-  const neutral = Math.max(0, 100 - total);
-  let signal = "WAIT";
-  let reason = "Indicators are mixed; wait for clearer alignment.";
-
-  if (buy >= 80 && buy > sell && rsi < 75) {
-    signal = "STRONG BUY";
-    reason = "Bullish trend and momentum indicators are aligned.";
-  } else if (sell >= 80 && sell > buy && rsi > 25) {
-    signal = "STRONG SELL";
-    reason = "Bearish trend and momentum indicators are aligned.";
-  } else if (buy >= 50 && buy > sell) {
-    signal = "WEAK BUY";
-    reason = "Some bullish indicators agree, but confirmation is limited.";
-  } else if (sell >= 50 && sell > buy) {
-    signal = "WEAK SELL";
-    reason = "Some bearish indicators agree, but confirmation is limited.";
-  }
-
-  const direction = signal.includes("BUY") ? 1 :
-                    signal.includes("SELL") ? -1 : 0;
-
-  // Levels are calculated even for WAIT, for reference only.
-  const risk = Math.max(atr * 1.5, price * 0.0005);
-  const entry = price;
-  const sl = direction >= 0 ? price - risk : price + risk;
-  const tp1 = direction >= 0 ? price + risk : price - risk;
-  const tp2 = direction >= 0 ? price + risk * 2 : price - risk * 2;
-  const tp3 = direction >= 0 ? price + risk * 3 : price - risk * 3;
-
-  return {
-    price, e20:fast, e50:slow, rsi, macd, atr,
-    buy, sell, neutral, signal, reason,
-    alignment:Math.max(buy, sell),
-    entry, sl, tp1, tp2, tp3,
-    rr:"1:1 / 1:2 / 1:3",
-    direction
-  };
+function analyze(candles){
+ const closes=candles.map(c=>c.close),last=candles[candles.length-1];
+ const e20=ema(closes,20),e50=ema(closes,50),rsi=calcRSI(closes),atr=calcATR(candles);
+ const macd=ema(closes,12)-ema(closes,26);
+ const prevMacd=ema(closes.slice(0,-1),12)-ema(closes.slice(0,-1),26);
+ let buy=0,sell=0;
+ if(Number.isFinite(e20)&&Number.isFinite(e50)){if(last.close>e20)buy++;else sell++;if(e20>e50)buy++;else sell++}
+ if(Number.isFinite(rsi)){if(rsi>52&&rsi<70)buy++;else if(rsi<48&&rsi>30)sell++}
+ if(Number.isFinite(macd)&&Number.isFinite(prevMacd)){if(macd>0&&macd>prevMacd)buy++;else if(macd<0&&macd<prevMacd)sell++}
+ if(last.close>candles[candles.length-2].close)buy++;else sell++;
+ const total=buy+sell;let signal="WAIT",direction=0;
+ if(buy>=4&&buy-sell>=2){signal=buy>=5?"STRONG BUY":"BUY";direction=1}
+ else if(sell>=4&&sell-buy>=2){signal=sell>=5?"STRONG SELL":"SELL";direction=-1}
+ const entry=last.close,stopDistance=Number.isFinite(atr)&&atr>0?atr*1.5:entry*.005;
+ const sl=direction===1?entry-stopDistance:direction===-1?entry+stopDistance:NaN;
+ const tp1=direction===1?entry+stopDistance:direction===-1?entry-stopDistance:NaN;
+ const tp2=direction===1?entry+stopDistance*2:direction===-1?entry-stopDistance*2:NaN;
+ const tp3=direction===1?entry+stopDistance*3:direction===-1?entry-stopDistance*3:NaN;
+ return {price:entry,signal,buy,sell,neutral:Math.max(0,5-total),e20,e50,rsi,macd,atr,entry,sl,tp1,tp2,tp3,rr:direction?"1:1 / 1:2 / 1:3":"—",candles};
 }
-
-function normalizeCandles(payload) {
-  let list = Array.isArray(payload) ? payload :
-             Array.isArray(payload.candles) ? payload.candles :
-             Array.isArray(payload.values) ? payload.values : null;
-
-  if (!list) {
-    throw new Error("The market-data response did not contain candles.");
-  }
-
-  const result = list.map(c => ({
-    time: c.datetime || c.time || c.date || "",
-    open: Number(c.open),
-    high: Number(c.high),
-    low: Number(c.low),
-    close: Number(c.close)
-  })).filter(c =>
-    Number.isFinite(c.open) &&
-    Number.isFinite(c.high) &&
-    Number.isFinite(c.low) &&
-    Number.isFinite(c.close)
-  );
-
-  // Many providers return newest candle first.
-  if (result.length > 1 && result[0].time && result[result.length - 1].time) {
-    if (String(result[0].time) > String(result[result.length - 1].time)) {
-      result.reverse();
-    }
-  }
-
-  return result;
+function addHistory(market,data){
+ if(!data.signal||data.signal==="WAIT"||data.signal==="ANALYZING…")return;
+ const key=market.name+":"+data.signal;
+ if(lastSignals[market.name]===key)return;
+ lastSignals[market.name]=key;
+ signalHistory.unshift({time:new Date().toLocaleTimeString(),pair:market.name,signal:data.signal,price:data.price});
+ signalHistory=signalHistory.slice(0,12);
+ $("history").innerHTML=signalHistory.map(item=>`<tr><td>${item.time}</td><td>${item.pair}</td><td class="${item.signal.includes("BUY")?"buy":"sell"}">${item.signal}</td><td>${fmt(item.price,item.pair)}</td></tr>`).join("");
 }
-
-async function getCandles(symbol, timeframe) {
-  const url = "/api/candles?symbol=" +
-    encodeURIComponent(symbol) +
-    "&interval=" + encodeURIComponent(timeframe) +
-    "&limit=100";
-
-  const response = await fetch(url, { cache:"no-store" });
-  if (!response.ok) {
-    throw new Error("Market API returned HTTP " + response.status);
-  }
-
-  const json = await response.json();
-
-  if (json && json.error) {
-    throw new Error(typeof json.error === "string"
-      ? json.error
-      : "The market-data provider returned an error.");
-  }
-
-  return normalizeCandles(json);
+function drawChart(candles){
+ const canvas=$("chart"),ctx=canvas.getContext("2d");
+ const width=canvas.clientWidth||600,height=190,dpr=window.devicePixelRatio||1;
+ canvas.width=width*dpr;canvas.height=height*dpr;ctx.scale(dpr,dpr);
+ ctx.clearRect(0,0,width,height);
+ if(!candles||candles.length<2)return;
+ const data=candles.slice(-55),min=Math.min(...data.map(c=>c.low)),max=Math.max(...data.map(c=>c.high));
+ const pad=12,span=max-min||1,plotH=height-pad*2,step=(width-pad*2)/data.length;
+ ctx.strokeStyle="#263247";ctx.lineWidth=1;
+ for(let i=0;i<4;i++){const y=pad+i*plotH/3;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(width-pad,y);ctx.stroke()}
+ data.forEach((c,i)=>{
+  const x=pad+i*step+step/2,yh=pad+(max-c.high)/span*plotH,yl=pad+(max-c.low)/span*plotH,yo=pad+(max-c.open)/span*plotH,yc=pad+(max-c.close)/span*plotH;
+  const color=c.close>=c.open?"#00e6a0":"#ff496c";
+  ctx.strokeStyle=color;ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(x,yh);ctx.lineTo(x,yl);ctx.stroke();
+  ctx.fillRect(x-step*.3,Math.min(yo,yc),Math.max(2,step*.6),Math.max(1,Math.abs(yc-yo)));
+ });
+ $("chartInfo").textContent="Showing latest "+data.length+" candles · "+fmt(min,selectedMarket?.name)+" – "+fmt(max,selectedMarket?.name);
 }
-
-function scoreLabel(result) {
-  if (!result) return "WAIT";
-  return result.signal;
-}
-
-function scoreClass(signal) {
-  if (signal === "STRONG BUY") return "strongbuy blink";
-  if (signal === "STRONG SELL") return "strongsell blink";
-  if (signal.includes("BUY")) return "buy";
-  if (signal.includes("SELL")) return "sell";
-  return "neutral";
-}
-
-function renderMarkets() {
-  const list = $("marketList");
-  const markets = MARKETS[selectedCategory] || [];
-
-  setText("listTitle", selectedCategory + " MARKETS");
-  setText("marketCount", markets.length + " pairs");
-
-  list.innerHTML = "";
-
-  markets.forEach(market => {
-    const result = marketResults[market.name];
-    const row = document.createElement("button");
-    row.className = "marketrow" +
-      (selectedMarket === market.name ? " active" : "");
-    row.type = "button";
-
-    const top = document.createElement("div");
-    top.className = "markettop";
-
-    const pair = document.createElement("span");
-    pair.className = "pair";
-    pair.textContent = market.label;
-
-    const price = document.createElement("span");
-    price.className = "price";
-    price.textContent = result ? fmt(result.price) : "Loading…";
-
-    top.append(pair, price);
-
-    const bottom = document.createElement("div");
-    bottom.className = "marketbottom";
-
-    const scores = [
-      ["BUY", result ? result.buy : null, "buy"],
-      ["SELL", result ? result.sell : null, "sell"],
-      [result ? scoreLabel(result) : "NEUTRAL",
-       result ? result.neutral : null,
-       result ? scoreClass(result.signal) : "neutral"]
-    ];
-
-    scores.forEach(item => {
-      const cell = document.createElement("div");
-      cell.className = "score " + item[2];
-
-      const label = document.createElement("span");
-      label.textContent = item[0];
-
-      const value = document.createElement("strong");
-      value.textContent = item[1] === null ? "—" : item[1] + "%";
-
-      cell.append(label, value);
-      bottom.appendChild(cell);
-    });
-
-    row.append(top, bottom);
-    row.addEventListener("click", () => {
-      selectedMarket = market.name;
-      $("details").classList.remove("hidden");
-      renderMarkets();
-      loadSelectedMarket();
-      $("details").scrollIntoView({ behavior:"smooth", block:"start" });
-    });
-
-    list.appendChild(row);
-  });
-}
-
-function drawChart(data) {
-  const canvas = $("chart");
-  const ctx = canvas.getContext("2d");
-  const width = canvas.width;
-  const height = canvas.height;
-  ctx.clearRect(0, 0, width, height);
-
-  if (!data.length) return;
-
-  const arr = data.slice(-65);
-  const low = Math.min(...arr.map(c => c.low));
-  const high = Math.max(...arr.map(c => c.high));
-  const range = high - low || 1;
-  const pad = 12;
-
-  ctx.strokeStyle = "#263247";
-  ctx.lineWidth = 1;
-
-  for (let i = 0; i < 5; i++) {
-    const y = pad + i * (height - 2 * pad) / 4;
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(width, y);
-    ctx.stroke();
-  }
-
-  arr.forEach((c, i) => {
-    const x = pad + i * (width - 2 * pad) / arr.length;
-    const barWidth = Math.max(2, (width - 2 * pad) / arr.length * .58);
-    const y = value =>
-      height - pad - (value - low) / range * (height - 2 * pad);
-
-    const color = c.close >= c.open ? "#00e6a0" : "#ff496c";
-    ctx.strokeStyle = color;
-    ctx.fillStyle = color;
-
-    ctx.beginPath();
-    ctx.moveTo(x + barWidth / 2, y(c.high));
-    ctx.lineTo(x + barWidth / 2, y(c.low));
-    ctx.stroke();
-
-    ctx.fillRect(
-      x,
-      y(Math.max(c.open, c.close)),
-      barWidth,
-      Math.max(1, Math.abs(y(c.open) - y(c.close)))
-    );
-  });
-}
-
-function recordHistory(symbol, result) {
-  if (!result) return;
-
-  const key = symbol + "|" + result.signal + "|" +
-              result.price.toPrecision(8);
-  if (historyItems[0] && historyItems[0].key === key) return;
-
-  historyItems.unshift({
-    key,
-    time:new Date().toLocaleTimeString(),
-    symbol,
-    signal:result.signal,
-    price:result.price
-  });
-
-  historyItems = historyItems.slice(0, 12);
-
-  const tbody = $("history");
-  tbody.innerHTML = "";
-
-  historyItems.forEach(item => {
-    const tr = document.createElement("tr");
-    [item.time, item.symbol, item.signal, fmt(item.price)].forEach((value, i) => {
-      const td = document.createElement("td");
-      td.textContent = value;
-      if (i === 2) td.className = scoreClass(item.signal);
-      tr.appendChild(td);
-    });
-    tbody.appendChild(tr);
-  });
-}
-
-function showAnalysis(symbol, data, result) {
-  candles = data;
-  analysis = result;
-
-  setText("selectedPair", symbol.replace("/", ""));
-  setText("currentPrice", fmt(result.price));
-  setText("detailStatus", "Live candle data received.");
-  setText("signal", result.signal);
-  $("signal").className = "signal " + scoreClass(result.signal);
-  setText("reason", result.reason);
-
-  setText("buyScore", result.buy + "%");
-  setText("sellScore", result.sell + "%");
-  setText("neutralScore", result.neutral + "%");
-  setText("alignment", result.alignment + "%");
-
-  setText("entry", fmt(result.entry));
-  setText("sl", fmt(result.sl));
-  setText("tp1", fmt(result.tp1));
-  setText("tp2", fmt(result.tp2));
-  setText("tp3", fmt(result.tp3));
-  setText("rr", result.rr);
-
-  setText("ema20", fmt(result.e20));
-  setText("ema50", fmt(result.e50));
-  setText("rsi", result.rsi.toFixed(2));
-  setText("macd", fmt(result.macd));
-  setText("atr", fmt(result.atr));
-  setText("candleCount", String(data.length));
-
-  setText("signalTime", "Calculated at " + new Date().toLocaleString());
-  setText("chartInfo", data.length + " candles · " + $("timeframe").value);
-  drawChart(data);
-  recordHistory(symbol, result);
-}
-
-async function loadSelectedMarket() {
-  const thisRequest = ++requestSequence;
-  const symbol = selectedMarket;
-  const timeframe = $("timeframe").value;
-
-  $("details").classList.remove("hidden");
-  setText("selectedPair", symbol.replace("/", ""));
-  setText("detailStatus", "Fetching live market data…");
-  setConnection("Loading data…", false);
-
-  try {
-    const data = await getCandles(symbol, timeframe);
-    if (thisRequest !== requestSequence) return;
-
-    const result = calculateAnalysis(data);
-    marketResults[symbol] = result;
-
-    showAnalysis(symbol, data, result);
-    renderMarkets();
-    setConnection("LIVE DATA RECEIVED", true);
-    setText("lastUpdated", "Updated " + new Date().toLocaleTimeString());
-
-    if (result.signal.startsWith("STRONG") &&
-        result.signal !== lastStrongSignal) {
-      lastStrongSignal = result.signal;
-    }
-  } catch (error) {
-    if (thisRequest !== requestSequence) return;
-    setConnection("DATA ERROR", false);
-    setText("detailStatus", error.message || "Unable to load market data.");
-    setText("lastUpdated", error.message || "Unable to load market data.");
-    setText("signal", "WAIT");
-    $("signal").className = "signal neutral";
-    setText("reason", "A signal cannot be calculated until valid data arrives.");
-  }
-}
-
-async function scanCategory() {
-  const markets = MARKETS[selectedCategory] || [];
-  setConnection("Scanning markets…", false);
-  setText("marketCount", "Scanning " + markets.length + " pairs…");
+async function loadSelectedMarket(){
+ if(!selectedMarket||detailBusy)return;
+ detailBusy=true;
+ const market=selectedMarket;
+ $("detailStatus").textContent="Loading candles and calculating indicators…";
+ try{
+  const candles=await fetchCandles(market);
+  if(!selectedMarket||selectedMarket.name!==market.name)return;
+  const data=analyze(candles);
+  marketData[market.name]=data;
+  $("currentPrice").textContent=fmt(data.price,market.name);
+  $("detailStatus").textContent="Market data loaded · "+new Date().toLocaleString();
+  $("signal").textContent=data.signal;
+  $("signal").className="signal "+(data.signal.includes("BUY")?"buy":data.signal.includes("SELL")?"sell":"neutral")+(data.signal.startsWith("STRONG")?" blink":"");
+  $("reason").textContent=data.signal==="WAIT"?"Indicators do not agree strongly enough for a directional signal.":data.signal.includes("BUY")?"Bullish technical conditions detected. Wait for your own confirmation.":"Bearish technical conditions detected. Wait for your own confirmation.";
+  $("buyScore").textContent=data.buy+"/5";
+  $("sellScore").textContent=data.sell+"/5";
+  $("neutralScore").textContent=data.neutral+"/5";
+  $("alignment").textContent=Math.round(Math.max(data.buy,data.sell)/5*100)+"%";
+  $("entry").textContent=fmt(data.entry,market.name);
+  $("sl").textContent=fmt(data.sl,market.name);
+  $("tp1").textContent=fmt(data.tp1,market.name);
+  $("tp2").textContent=fmt(data.tp2,market.name);
+  $("tp3").textContent=fmt(data.tp3,market.name);
+  $("rr").textContent=data.rr;
+  $("ema20").textContent=fmt(data.e20,market.name);
+  $("ema50").textContent=fmt(data.e50,market.name);
+  $("rsi").textContent=Number.isFinite(data.rsi)?data.rsi.toFixed(2):"—";
+  $("macd").textContent=fmt(data.macd,market.name);
+  $("atr").textContent=fmt(data.atr,market.name);
+  $("candleCount").textContent=candles.length;
+  $("signalTime").textContent="Analysis updated: "+new Date().toLocaleString();
+  drawChart(candles);
+  addHistory(market,data);
   renderMarkets();
-
-  // Request markets sequentially to reduce API pressure.
-  for (const market of markets) {
-    try {
-      const data = await getCandles(market.name, $("timeframe").value);
-      const result = calculateAnalysis(data);
-      marketResults[market.name] = result;
-
-      if (market.name === selectedMarket) {
-        showAnalysis(market.name, data, result);
-      }
-
-      renderMarkets();
-    } catch (error) {
-      marketResults[market.name] = null;
-      renderMarkets();
-    }
+ }catch(error){
+  if(selectedMarket&&selectedMarket.name===market.name){
+   $("currentPrice").textContent="—";
+   $("signal").textContent="DATA UNAVAILABLE";
+   $("signal").className="signal neutral";
+   $("reason").textContent="No reliable analysis can be made without market data.";
+   $("detailStatus").textContent=error.message||"Could not load market data.";
   }
-
-  const available = markets.filter(m => marketResults[m.name]).length;
-  setText("marketCount", available + " / " + markets.length + " markets ready");
-
-  if (available > 0) {
-    setConnection("LIVE DATA RECEIVED", true);
-    setText("lastUpdated", "Last scan " + new Date().toLocaleTimeString());
-  } else {
-    setConnection("DATA UNAVAILABLE", false);
-    setText("lastUpdated",
-      "No pairs returned valid data. Check API limits and supported symbols.");
-  }
-}
-
-$("category").addEventListener("change", async event => {
-  selectedCategory = event.target.value;
-  selectedMarket = MARKETS[selectedCategory][0].name;
-  $("details").classList.remove("hidden");
+  marketData[market.name]={error:true,signal:"DATA ERROR"};
   renderMarkets();
-  await scanCategory();
-});
-
-$("timeframe").addEventListener("change", async () => {
-  await scanCategory();
-});
-
-$("refresh").addEventListener("click", async () => {
-  await scanCategory();
-});
-
-$("copySignal").addEventListener("click", async () => {
-  if (!analysis) {
-    alert("No market analysis is available yet.");
-    return;
+ }finally{detailBusy=false}
+}
+async function scanMarkets(){
+ if(scanBusy)return;
+ scanBusy=true;
+ setConnection("Scanning…");
+ const markets=categoryMarkets();
+ let success=0;
+ for(const market of markets){
+  try{
+   const candles=await fetchCandles(market);
+   const data=analyze(candles);
+   marketData[market.name]=data;
+   addHistory(market,data);
+   success++;
+  }catch(error){
+   marketData[market.name]={error:true,signal:"WAIT"};
   }
-
-  const text = [
-    "GENERAL PRO V1.0",
-    "Market: " + selectedMarket,
-    "Signal: " + analysis.signal,
-    "Current price: " + fmt(analysis.price),
-    "BUY score: " + analysis.buy + "%",
-    "SELL score: " + analysis.sell + "%",
-    "Neutral score: " + analysis.neutral + "%",
-    "Entry: " + fmt(analysis.entry),
-    "Stop Loss: " + fmt(analysis.sl),
-    "TP1: " + fmt(analysis.tp1),
-    "TP2: " + fmt(analysis.tp2),
-    "TP3: " + fmt(analysis.tp3),
-    "Note: Technical analysis only; no guaranteed results."
-  ].join("\n");
-
-  try {
-    await navigator.clipboard.writeText(text);
-    alert("Market analysis copied.");
-  } catch {
-    prompt("Copy your market analysis:", text);
-  }
+  renderMarkets();
+ }
+ $("lastUpdated").textContent="Last scan: "+new Date().toLocaleString()+" · "+success+"/"+markets.length+" markets returned data.";
+ setConnection(success?"Data received":"No data",success>0);
+ scanBusy=false;
+}
+$("category").addEventListener("change",()=>{
+ selectedMarket=null;showDashboard();renderMarkets();scanMarkets();
 });
-
-// Initial load.
+$("timeframe").addEventListener("change",()=>{
+ if(selectedMarket)loadSelectedMarket();
+ scanMarkets();
+});
+$("refresh").addEventListener("click",()=>{
+ scanMarkets();
+ if(selectedMarket)loadSelectedMarket();
+});
+$("backToDashboard").addEventListener("click",showDashboard);
+$("copySignal").addEventListener("click",async()=>{
+ if(!selectedMarket)return;
+ const d=marketData[selectedMarket.name];
+ if(!d||d.error){$("detailStatus").textContent="No market analysis available to copy.";return}
+ const textCopy=`GENERAL PRO V1.0
+Market: ${selectedMarket.name}
+Signal: ${d.signal}
+Price: ${fmt(d.price,selectedMarket.name)}
+Entry: ${fmt(d.entry,selectedMarket.name)}
+Stop Loss: ${fmt(d.sl,selectedMarket.name)}
+TP1: ${fmt(d.tp1,selectedMarket.name)}
+TP2: ${fmt(d.tp2,selectedMarket.name)}
+TP3: ${fmt(d.tp3,selectedMarket.name)}
+RSI: ${Number.isFinite(d.rsi)?d.rsi.toFixed(2):"—"}
+Note: Technical market analysis only. Not a guarantee of results.`;
+ try{
+  await navigator.clipboard.writeText(textCopy);
+  $("detailStatus").textContent="Analysis copied successfully.";
+ }catch(e){
+  const area=document.createElement("textarea");area.value=textCopy;document.body.appendChild(area);area.select();
+  const ok=document.execCommand("copy");area.remove();
+  $("detailStatus").textContent=ok?"Analysis copied successfully.":"Copy failed. Please copy the text manually.";
+ }
+});
+window.addEventListener("resize",()=>{
+ const d=selectedMarket&&marketData[selectedMarket.name];
+ if(d&&d.candles)drawChart(d.candles);
+});
 renderMarkets();
-scanCategory();
-
-// Refresh the visible market list periodically.
-// A complete category scan is spaced to reduce API requests.
-setInterval(() => {
-  scanCategory();
-}, 180000);
-</script>
-
-</body>
-</html>
+scanMarkets();
+</script></body></html>
